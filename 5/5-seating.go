@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 )
 
 type docR = map[string]string
@@ -32,12 +33,14 @@ func main() {
 			pass = 0
 		}
 	}
-	fmt.Println(passes)
-	highest := uint16(0)
+	sort.Slice(passes, func(i, j int) bool { return passes[i] < passes[j] })
+	last := uint16(1023)
 	for _, pass := range passes {
-		if pass > highest {
-			highest = pass
+		if pass > last+1 {
+			fmt.Println(last + 1)
+			break
 		}
+		last = pass
 	}
-	fmt.Println(highest)
+
 }
