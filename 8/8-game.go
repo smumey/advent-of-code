@@ -6,10 +6,23 @@ import (
 	"io"
 )
 
-type instructT = struct {
+type instructT struct {
 	operation string
 	argument  int
 	count     int
+}
+
+func (instruction *instructT) isSwappable() bool {
+	return instruction.operation == "nop" || instruction.operation == "jmp"
+}
+
+func (instruction *instructT) swap() {
+	switch instruction.operation {
+	case "nop":
+		instruction.operation = "jmp"
+	case "jmp":
+		instruction.operation = "nop"
+	}
 }
 
 var errRepeat error = errors.New("repeated operation")
@@ -50,38 +63,18 @@ func process(instructions []instructT, pointer int, accumulator int) (int, error
 	}
 }
 
-func isSwappable(instruction instructT) bool {
-	return instruction.operation == "nop" || instruction.operation == "jmp"
-}
-
-func swap(instruction instructT) instructT {
-	switch instruction.operation {
-	case "nop":
-		instruction.operation = "jmp"
-	case "jmp":
-		instruction.operation = "nop"
-	}
-	return instruction
-}
-
-func mutate(instructions []instructT) func() ([]instructT, error) {
-	m := 0
+func mutator(instructions []instructT) func() ([]instructT, error) {
+	lastSwapped := -1
+	n := len(instructions)
 	return func() ([]instructT, error) {
 		mut := make([]instructT, len(instructions))
-		n := 0
-		for i, instruction := range instructions {
-			newI := instruction
-			if n < m && isSwappable(instruction) {
-				if n == m-1 {
-					newI = swap(instruction)
-				}
-				n++
+		copy(mut, instructions)
+		for i := lastSwapped + 1; i < n; i++ {
+			if mut[i].isSwappable() {
+				mut[i].swap()
+				lastSwapped = i
+				return mut, nil
 			}
-			mut[i] = newI
-		}
-		if n == m {
-			m++
-			return mut, nil
 		}
 		return nil, errNoMore
 	}
@@ -91,8 +84,8 @@ func main() {
 	var instructions []instructT
 	for {
 		instruction := instructT{}
-		n, err := fmt.Scanf("%s %d", &instruction.operation, &instruction.argument)
-		fmt.Printf("n=%d err=%v\n", n, err)
+		_, err := fmt.Scanf("%s %d", &instruction.operation, &instruction.argument)
+		// fmt.Printf("n=%d err=%v\n", n, err)
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -100,9 +93,9 @@ func main() {
 		}
 		instructions = append(instructions, instruction)
 	}
-	mutator := mutate(instructions)
+	mutate := mutator(instructions)
 	for {
-		newI, err := mutator()
+		newI, err := mutate()
 		if err != nil {
 			panic(err)
 		}
