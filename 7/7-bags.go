@@ -31,6 +31,16 @@ func findContainers(bag string, contains []containT) map[string]bool {
 	return containers
 }
 
+func countContents(bag string, contains []containT) int {
+	count := 0
+	for _, contain := range contains {
+		if contain.container == bag {
+			count += contain.count * (1 + countContents(contain.containee, contains))
+		}
+	}
+	return count
+}
+
 func main() {
 	var contains []containT
 
@@ -48,6 +58,5 @@ func main() {
 		}
 	}
 	fmt.Println(contains)
-	containerMap := findContainers("shiny gold bag", contains)
-	fmt.Println(len(containerMap))
+	fmt.Println(countContents("shiny gold bag", contains))
 }
