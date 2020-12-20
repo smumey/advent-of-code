@@ -8,6 +8,34 @@ import (
 
 const inputJolts = 0
 
+var lookups = make(map[int]int)
+
+func calculate(adapters []int, index int) int {
+	n := len(adapters)
+	var a int
+	count, exists := lookups[index]
+	if exists {
+		return count
+	}
+	switch index {
+	case n - 1:
+		return 1
+	case -1:
+		a = 0
+	default:
+		a = adapters[index]
+	}
+	for i := index + 1; i <= index+3 && i < n; i++ {
+		if adapters[i]-a <= 3 {
+			count += calculate(adapters, i)
+		} else {
+			break
+		}
+	}
+	lookups[index] = count
+	return count
+}
+
 func findDiffCountsProduct(adapters []int) (int, error) {
 	sort.Ints(adapters)
 	onesCount := 0
@@ -41,9 +69,7 @@ func main() {
 		}
 		numbers = append(numbers, number)
 	}
-	prod, err := findDiffCountsProduct(numbers)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(prod)
+	sort.Ints(numbers)
+	count := calculate(numbers, -1)
+	fmt.Println(count)
 }
