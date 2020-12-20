@@ -7,11 +7,21 @@ import (
 	"os"
 )
 
-func evalAngle(treeMap [][]bool, right int) int {
-	count := 0
-	for i, row := range treeMap[1:] {
-		pos := (right * (i + 1)) % len(row)
-		if row[pos] {
+type Slope struct {
+	right int
+	down  int
+}
+
+func evalAngle(treeMap [][]bool, slope Slope) int {
+	var count, i, j int
+	width := len(treeMap[0])
+	for {
+		i = (i + slope.right) % width
+		j += slope.down
+		if j >= len(treeMap) {
+			break
+		}
+		if treeMap[j][i] {
 			count++
 		}
 	}
@@ -39,8 +49,12 @@ func main() {
 			treeMap = append(treeMap, row)
 			row = []bool{}
 		default:
-			panic(fmt.Sprintf("Unexpect char %v.", rune))
+			panic(fmt.Sprintf("Unexpected char %v.", rune))
 		}
 	}
-	fmt.Println(evalAngle(treeMap, 3))
+	product := 1
+	for _, slope := range []Slope{{1, 1}, Slope{3, 1}, Slope{5, 1}, Slope{7, 1}, Slope{1, 2}} {
+		product *= evalAngle(treeMap, slope)
+	}
+	fmt.Println(product)
 }
