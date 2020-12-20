@@ -8,7 +8,6 @@ const readline = require('readline')
 const lines = [];
 
 readline.on('line', function (line) {
-	console.log('line', line);
     lines.push(line);
 });
 
@@ -26,9 +25,13 @@ function findMatch(numbers)
 		for (let j = i; j < numbers.length; j++) 
 		{
 			const n2 = numbers[j];
-			if (n1 + n2 === 2020)
+			for (let k = j; k < numbers.length; k++)
 			{
-				return n1 * n2;
+				const n3 = numbers[k]
+				if (n1 + n2 + n3 === 2020)
+				{
+					return n1 * n2 * n3;
+				}
 			}
 		}
 	}
