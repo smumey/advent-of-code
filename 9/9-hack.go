@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -8,14 +9,7 @@ import (
 
 const preambleLength = 25
 
-// func push(numbers int[], num int)
-// {
-// 	n := len(numbers)
-// 	for i := 1; i < len(numbers); i++ {
-// 		numbers[i-1] = numbers[i]
-// 	}
-// 	numbers[n]
-// }
+var errNotFound = errors.New("not found")
 
 func findMismatch(numbers []int, targetSum int) bool {
 	n := len(numbers)
@@ -38,19 +32,44 @@ func findMismatch(numbers []int, targetSum int) bool {
 	return true
 }
 
+func findContiguous(numbers []int, prime int) (int, error) {
+	for i, t1 := range numbers {
+		s := t1
+		min := t1
+		max := t1
+		for _, t2 := range numbers[i+1:] {
+			s += t2
+			if t2 < min {
+				min = t2
+			} else if t2 > max {
+				max = t2
+			}
+			if s == prime {
+				return min + max, nil
+			}
+		}
+	}
+	return 0, errNotFound
+}
+
 func main() {
 	numbers := make([]int, 0, preambleLength)
+	var prime int
 	for {
 		var number int
 		_, err := fmt.Scanf("%d", &number)
 		if err == io.EOF {
-			break
+			panic("No number found!")
 		}
 		if findMismatch(numbers, number) {
-			fmt.Println(number)
+			prime = number
 			break
 		}
 		numbers = append(numbers, number)
 	}
-
+	sum, err := findContiguous(numbers, prime)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(sum)
 }
