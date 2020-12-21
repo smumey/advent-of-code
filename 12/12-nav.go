@@ -40,51 +40,69 @@ func (boat boatT) distance() int {
 	return abs(boat.x) + abs(boat.y)
 }
 
-func (boat boatT) offset(waypoint waypointT) {
-
-}
-
-func (boat boatT) move(direction int, distance int) boatT {
+func (waypoint waypointT) move(direction int, distance int) waypointT {
 	switch direction {
 	case north:
-		boat.y += distance
+		waypoint.y += distance
 	case east:
-		boat.x += distance
+		waypoint.x += distance
 	case south:
-		boat.y -= distance
+		waypoint.y -= distance
 	case west:
-		boat.x -= distance
+		waypoint.x -= distance
 	default:
 		panic(fmt.Errorf("invalid direction %d", direction))
 	}
+	return waypoint
+}
+
+func (boat boatT) move(waypoint waypointT, magnitude int) boatT {
+	boat.x += magnitude * waypoint.x
+	boat.y += magnitude * waypoint.y
 	return boat
 }
 
-func (boat boatT) rotate(angle int) boatT {
-	boat.direction = (boat.direction + angle + 360) % 360
-	return boat
+func (waypoint waypointT) rotate(angle int) waypointT {
+	x := waypoint.x
+	y := waypoint.y
+	angle = (angle + 360) % 360
+	switch angle {
+	case 90:
+		waypoint.x = y
+		waypoint.y = -x
+	case 180:
+		waypoint.x = -x
+		waypoint.y = -y
+	case 270:
+		waypoint.x = -y
+		waypoint.y = x
+	default:
+		panic(fmt.Errorf("bad rotate angle %d", angle))
+	}
+	return waypoint
 }
 
-func (boat boatT) execute(instruction instructionT) boatT {
+func execute(boat boatT, waypoint waypointT, instruction instructionT) (boatT, waypointT) {
 	magnitude := instruction.magnitude
 	switch instruction.name {
 	case 'N':
-		return boat.move(north, magnitude)
+		waypoint = waypoint.move(north, magnitude)
 	case 'E':
-		return boat.move(east, magnitude)
+		waypoint = waypoint.move(east, magnitude)
 	case 'S':
-		return boat.move(south, magnitude)
+		waypoint = waypoint.move(south, magnitude)
 	case 'W':
-		return boat.move(west, magnitude)
+		waypoint = waypoint.move(west, magnitude)
 	case 'L':
-		return boat.rotate(-magnitude)
+		waypoint = waypoint.rotate(-magnitude)
 	case 'R':
-		return boat.rotate(magnitude)
+		waypoint = waypoint.rotate(magnitude)
 	case 'F':
-		return boat.move(boat.direction, magnitude)
+		boat = boat.move(waypoint, magnitude)
 	default:
 		panic(fmt.Errorf("invalid instruction %c", instruction.name))
 	}
+	return boat, waypoint
 }
 
 func main() {
@@ -94,6 +112,10 @@ func main() {
 		0,
 	}
 	current := initial
+	waypoint := waypointT{
+		10,
+		1,
+	}
 	for {
 		var instruction instructionT
 		_, err := fmt.Scanf("%c%d", &instruction.name, &instruction.magnitude)
@@ -103,7 +125,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		current = current.execute(instruction)
+		current, waypoint = execute(current, waypoint, instruction)
 	}
 	fmt.Println(current.distance())
 }
