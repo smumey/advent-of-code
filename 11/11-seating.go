@@ -12,8 +12,8 @@ type cellT rune
 
 const (
 	floor    cellT = '.'
-	empty          = 'L'
-	occupied       = '#'
+	empty    cellT = 'L'
+	occupied cellT = '#'
 )
 
 type seatingT [][]cellT
@@ -34,22 +34,7 @@ func checkBounds(v int, size int) bool {
 }
 
 func (seating seatingT) nextCell(row int, col int) cellT {
-	height := seating.height()
-	width := seating.width()
-	occ := 0
-	for j := row - 1; j <= row+1; j++ {
-		if !checkBounds(j, height) {
-			continue
-		}
-		for i := col - 1; i <= col+1; i++ {
-			if !checkBounds(i, width) || j == row && i == col {
-				continue
-			}
-			if seating[j][i] == occupied {
-				occ++
-			}
-		}
-	}
+	occ := seating.observeCount(row, col)
 	switch seating[row][col] {
 	case floor:
 		return floor
@@ -59,13 +44,44 @@ func (seating seatingT) nextCell(row int, col int) cellT {
 		}
 		return empty
 	case occupied:
-		if occ >= 4 {
+		if occ >= 5 {
 			return empty
 		}
 		return occupied
 	default:
 		panic(fmt.Errorf("illegal seat state %c", seating[row][col]))
 	}
+}
+
+func nextPosGen(rowInc int, colInc int) func(int, int) (int, int) {
+	return func(row int, col int) (int, int) {
+		return row + rowInc, col + colInc
+	}
+}
+
+func (seating seatingT) observeCount(row int, col int) int {
+	height := seating.height()
+	width := seating.width()
+	inc := []int{-1, 0, 1}
+	occ := 0
+	for _, rowInc := range inc {
+		for _, colInc := range inc {
+			if rowInc == 0 && colInc == 0 {
+				continue
+			}
+			nextPos := nextPosGen(rowInc, colInc)
+			var i, j int
+			for j, i = nextPos(row, col); checkBounds(j, height) && checkBounds(i, width); j, i = nextPos(j, i) {
+				if seating[j][i] == occupied {
+					occ++
+					break
+				} else if seating[j][i] == empty {
+					break
+				}
+			}
+		}
+	}
+	return occ
 }
 
 func (seating seatingT) nextSeating() seatingT {
