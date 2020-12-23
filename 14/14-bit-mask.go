@@ -7,23 +7,24 @@ import (
 	"strings"
 )
 
+const wordLength = uint8(36)
+
 type maskT struct {
-	or, and uint64
+	or, wild uint64
 }
 
 func readMask(text string) maskT {
 	mask := maskT{}
 	reader := strings.NewReader(text)
-	for i := 35; i >= 0; i-- {
+	for i := int(wordLength - 1); i >= 0; i-- {
 		b, _, err := reader.ReadRune()
 		if err != nil {
 			panic(err)
 		}
 		switch b {
 		case 'X':
-			mask.and |= 1
+			mask.wild |= 1
 		case '1':
-			mask.and |= 1
 			mask.or |= 1
 		case '0':
 			// do nothing
@@ -31,24 +32,51 @@ func readMask(text string) maskT {
 			panic(fmt.Errorf("bad mask char %c", b))
 		}
 		if i > 0 {
-			mask.and <<= 1
+			mask.wild <<= 1
 			mask.or <<= 1
 		}
 	}
 	return mask
 }
 
-func (mask maskT) apply(number uint64) uint64 {
-	return (number | mask.or) & mask.and
+func (mask maskT) addressGen(address uint64) func() uint64 {
+	wildBits := []uint8{}
+	maskAddr := (address | mask.or) & ^mask.wild
+	for i := uint8(0); i < wordLength; i++ {
+		if mask.wild&(1<<i) > 0 {
+			wildBits = append(wildBits, i)
+		}
+	}
+	wildCount := len(wildBits)
+	permuteLimit := 1 << wildCount
+	fmt.Printf("maskAddr %036b\n", maskAddr)
+	fmt.Printf("wild bits %v permuteLimit %d\n", wildBits, permuteLimit)
+	permute := 0
+	return func() uint64 {
+		if permute == permuteLimit {
+			return ^uint64(0)
+		}
+		newAddr := maskAddr
+		i := 0
+		for p := permute; p > 0; p >>= 1 {
+			if 1&p > 0 {
+				newAddr = newAddr | (1 << wildBits[i])
+			}
+			i++
+		}
+		// fmt.Printf("%d perm = %036b\n", permute, newAddr)
+		permute++
+		return newAddr
+	}
 }
 
 func (mask maskT) String() string {
-	return fmt.Sprintf("{or: %036b and: %036b}", mask.or, mask.and)
+	return fmt.Sprintf("{or: %036b wild: %036b}", mask.or, mask.wild)
 }
 
 func main() {
 	mem := make(map[uint64]uint64)
-	mask := maskT{0, 1<<36 - 1}
+	mask := maskT{0, 1<<wordLength - 1}
 
 	for {
 		var assignee, assignment string
@@ -69,9 +97,11 @@ func main() {
 			if err != nil {
 				panic(fmt.Errorf("bad assignee '%s'", assignee))
 			}
-			raw, _ := strconv.ParseUint(assignment, 10, 36)
-			mem[address] = mask.apply(raw)
-			fmt.Printf("read %d (raw %d) into %d\n", mem[address], raw, address)
+			raw, _ := strconv.ParseUint(assignment, 10, int(wordLength))
+			nextAddr := mask.addressGen(address)
+			for addr := nextAddr(); addr != ^uint64(0); addr = nextAddr() {
+				mem[addr] = raw
+			}
 		}
 	}
 	sum := uint64(0)
