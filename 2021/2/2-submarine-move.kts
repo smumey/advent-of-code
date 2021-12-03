@@ -10,12 +10,12 @@ fun parseMove(line: String): Move {
 
 data class Move(val direction: Direction, val scalar: Int)
 
-data class Position constructor(val horizontal: Int, val depth: Int) {
+data class Position constructor(val horizontal: Int, val depth: Int, val aim: Int) {
     fun apply(move: Move): Position {
         return when (move.direction) {
-            Direction.UP -> Position(horizontal, depth - move.scalar)
-            Direction.DOWN -> Position(horizontal, depth + move.scalar)
-            Direction.FORWARD -> Position(horizontal + move.scalar, depth)
+            Direction.UP -> Position(horizontal, depth, aim - move.scalar)
+            Direction.DOWN -> Position(horizontal, depth, aim + move.scalar)
+            Direction.FORWARD -> Position(horizontal + move.scalar, depth + aim * move.scalar, aim)
         }
     }
 
@@ -27,7 +27,7 @@ data class Position constructor(val horizontal: Int, val depth: Int) {
 fun main() {
     println(
         generateSequence(::readLine).fold(
-            Position(0, 0),
+            Position(0, 0, 0),
             { pos: Position, line: String -> pos.apply(parseMove(line)) }
         )
         .product()
