@@ -26,10 +26,11 @@ data class Position constructor(val horizontal: Int, val depth: Int, val aim: In
 
 fun main() {
     println(
-        generateSequence(::readLine).fold(
-            Position(0, 0, 0),
-            { pos: Position, line: String -> pos.apply(parseMove(line)) }
-        )
-        .product()
+        generateSequence(::readLine)
+            .fold(
+                Position(0, 0, 0),
+                { pos: Position, line: String -> pos.apply(parseMove(line)) }
+            )
+            .product()
     )
 }
