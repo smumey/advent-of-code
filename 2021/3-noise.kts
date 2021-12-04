@@ -1,39 +1,44 @@
-data class Trace(val digits: Int, val value: Int)
+data class Trace(val bits: Int, val value: Int)
 
 fun parseTrace(line: String): Trace {
     return Trace(line.length, line.toInt(2))
 }
 
-fun gamma(traces: List<Trace>): Int {
-    val digits = traces[0].digits
+fun pick(value: Int, bit: Int): Int {
+    return (value ushr bit) and 1
+}
+
+fun eval(traces: List<Trace>, compare: (Int, Int) -> Boolean, bit: Int): Int {
     val length = traces.size
-    var g = 0
-    for (d in 0 until digits) {
-        val sum = traces.asSequence()
-            .map({ trace -> (trace.value ushr d) and 1 })
-            .sum()
-        g += if (2 * sum == length) {
-            throw Exception("bad count ${sum} for ${length} length")
-        } else if (2 * sum > length) {
-            1 shl d
-        } else {
-            0
-        }
+    if (length == 1) {
+        return traces[0].value
     }
-    return g
+
+    val sum = traces.asSequence()
+        .map({ trace -> pick(trace.value, bit) })
+        .sum()
+
+    val predicate = { trace: Trace ->
+        val v = trace.value
+        pick(v, bit) == if (compare(2 * sum, length)) 1 else 0
+    }
+
+    return eval(traces.asSequence().filter(predicate).toList(), compare, bit - 1)
 }
 
-fun epsilon(traces: List<Trace>): Int {
-    val mask = (1 shl traces[0].digits)  - 1
-    return (gamma(traces) xor -1) and mask
+fun oxygen(traces: List<Trace>): Int {
+    return eval(traces, { x, y -> x >= y }, traces[0].bits - 1)
 }
 
+fun co2(traces: List<Trace>): Int {
+    return eval(traces, { x, y -> x < y }, traces[0].bits - 1)
+}
 
 fun main() {
     val traces = generateSequence(::readLine)
         .map(::parseTrace)
         .toList()
-    println(gamma(traces) * epsilon(traces))
+    println(oxygen(traces) * co2(traces))
 }
 
 main()
