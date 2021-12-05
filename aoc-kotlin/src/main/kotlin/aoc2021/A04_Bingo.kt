@@ -17,7 +17,7 @@ data class Card(val numbers: List<Int>) {
 
     private fun columns(): Sequence<List<Int>> {
         return (0..4).asSequence()
-            .map { i -> numbers.filterIndexed { j, n -> j % 5 == i } }
+            .map { i -> numbers.filterIndexed { j, _ -> j % 5 == i } }
     }
 
     fun score(called: List<Int>): Int {
@@ -44,9 +44,9 @@ fun main() {
     val called = readLine().orEmpty().split(",").map(String::toInt)
     val cards: List<Card> = generateSequence(::readCard).toList()
     println(
-        (5 until called.size)
+        (5 until called.size).asSequence()
             .map { called.subList(0, it) }
-            .flatMap { cards.filter { card -> card.wins(it) }.map { card -> card.score(it) } }
-            .firstOrNull()
+            .flatMap { cards.filter { card -> card.wins(it) && !card.wins(it.subList(0, it.size -1)) }.map { card -> card.score(it) } }
+            .lastOrNull()
     )
 }
