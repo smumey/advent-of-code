@@ -48,7 +48,7 @@ fun toRange(x: Int, y: Int): IntRange {
 }
 
 
-fun readLine(line: String): Line {
+fun parseLine(line: String): Line {
     val (p1, p2) = line.split(" -> ")
         .map { p ->
             val (x, y) = p.split(",").map(String::toInt)
@@ -58,7 +58,7 @@ fun readLine(line: String): Line {
 }
 
 fun main() {
-    val lines = generateSequence(::readLine).map(::readLine).toList()
+    val lines = generateSequence(::readLine).map(::parseLine).toList()
     println(
         lines
             .flatMap(Line::points)
