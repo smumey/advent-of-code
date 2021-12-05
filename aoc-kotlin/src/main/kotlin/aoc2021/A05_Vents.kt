@@ -5,20 +5,16 @@ import kotlin.math.abs
 data class Point(val x: Int, val y: Int)
 
 data class Line(val begin: Point, val end: Point) {
-    fun includes(point: Point): Boolean {
-        return (point.x == begin.x && begin.y <= point.y && point.y <= end.y) ||
-                (point.y == begin.y && begin.x <= point.x && point.x <= end.x)
-    }
 
-    fun isVertical(): Boolean {
+    private fun isVertical(): Boolean {
         return begin.x == end.x;
     }
 
-    fun isHorizontal(): Boolean {
+    private fun isHorizontal(): Boolean {
         return begin.y == end.y
     }
 
-    fun isDiagonal(): Boolean {
+    private fun isDiagonal(): Boolean {
         return abs(begin.x - end.x) == abs(begin.y - end.y)
     }
 
