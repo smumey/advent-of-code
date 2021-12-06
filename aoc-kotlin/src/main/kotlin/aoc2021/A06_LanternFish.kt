@@ -5,7 +5,7 @@ fun advance(counts: Map<Int, Long>): Map<Int, Long> {
 		val (stage, count) = entry
 		if (stage > 0) {
 			nc[stage - 1] = (nc[stage - 1] ?: 0L) + count
-		} else if (stage == 0) {
+		} else {
 			nc[6] = (nc[6] ?: 0L) + count
 			nc[8] = count
 		}
