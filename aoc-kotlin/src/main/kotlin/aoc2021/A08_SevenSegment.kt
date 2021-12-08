@@ -51,8 +51,8 @@ fun main() {
 	println(
 		readings
 			.map {
-				val cipher = deduce(it.inputs)
-				it.outputs.map { code -> cipher[code] }
+				val decipher = deduce(it.inputs)
+				it.outputs.map { code -> decipher[code] }
 					.fold(0) { value, digit -> 10 * value + (digit ?: Int.MAX_VALUE) }
 			}
 			.sum()
