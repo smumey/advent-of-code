@@ -1,8 +1,7 @@
 package aoc2021
 
-import java.util.*
-
 private data class HeightPoint(val x: Int, val y: Int, val height: Int) {
+
 	fun neighbours(map: HeightMap): Set<HeightPoint> {
 		return ((y - 1..y + 1 step 2)
 			.filter { 0 <= it && it < map.mapHeight }
@@ -16,29 +15,38 @@ private data class HeightPoint(val x: Int, val y: Int, val height: Int) {
 private data class HeightMap(val heights: List<Int>, val mapWidth: Int) {
 	val mapHeight = heights.size / mapWidth
 
-	fun findLows(points: List<HeightPoint>): List<HeightPoint> {
-		var lows = emptyList<HeightPoint>()
-		var candidates = points
+	fun findBasins(points: List<HeightPoint>): Set<Set<HeightPoint>> {
+		val basins: MutableSet<Set<HeightPoint>> = mutableSetOf()
+		var candidates = points.filter { it.height < 9 }.toMutableList()
 		while (candidates.isNotEmpty()) {
-			val neighbours = candidates[0].neighbours(this)
-			if (neighbours.all { it.height > candidates[0].height }) {
-				lows += candidates[0]
-				candidates = candidates.subList(1, candidates.size)
-					.filter { !neighbours.contains(it) }
-			} else {
-				candidates = candidates.subList(1, candidates.size)
+			var basin = setOf(candidates[0])
+			val basinCandidates = mutableListOf(candidates[0])
+			while (basinCandidates.isNotEmpty()) {
+				var point = basinCandidates.removeAt(0)
+				val adds = getAdds(point, candidates, basin)
+				basinCandidates.addAll(adds)
+				basin += adds
 			}
+			basins.add(basin)
+			candidates -= basin
 		}
-		return lows
+		return basins
 	}
+
+	private fun getAdds(
+		point: HeightPoint,
+		candidates: MutableList<HeightPoint>,
+		basin: Set<HeightPoint>
+	) = point.neighbours(this)
+		.filter { it.height < 9 && candidates.contains(it) && !basin.contains(it) }
 
 	private fun sortedPoints(): List<HeightPoint> {
 		return heights.mapIndexed { i, h -> HeightPoint(i % mapWidth, i / mapWidth, h) }
 			.sortedWith { p1, p2 -> p1.height.compareTo(p2.height) }
 	}
 
-	fun findLows(): List<HeightPoint> {
-		return findLows(sortedPoints())
+	fun findBasins(): Set<Set<HeightPoint>> {
+		return findBasins(sortedPoints())
 	}
 
 	fun getPoint(x: Int, y: Int): HeightPoint {
@@ -51,7 +59,10 @@ fun main() {
 		.map { it.toCharArray().map { c -> c - '0' } }
 		.toList()
 	println(
-		HeightMap(cells.flatten(), cells[0].size).findLows()
-			.sumOf { it.height + 1 }
+		HeightMap(cells.flatten(), cells[0].size).findBasins()
+			.map { it.size }
+			.sortedDescending()
+			.take(3)
+			.fold(1) { p, b -> p * b }
 	)
 }
