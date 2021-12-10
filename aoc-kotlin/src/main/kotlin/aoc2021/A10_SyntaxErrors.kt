@@ -26,6 +26,20 @@ private class Stack {
 		return if (content.isEmpty()) false
 		else content.removeLast() == char
 	}
+
+	fun complete(): CharArray {
+		return content.reversed()
+			.map {
+				when (it) {
+					'<' -> '>'
+					'[' -> ']'
+					'{' -> '}'
+					'(' -> ')'
+					else -> '*'
+				}
+			}
+			.toCharArray()
+	}
 }
 
 fun checkLine(line: CharArray): Char? {
@@ -36,21 +50,30 @@ fun checkLine(line: CharArray): Char? {
 		.firstOrNull()
 }
 
+fun complete(line: CharArray): CharArray {
+	val stack = Stack()
+	line.forEach(stack::handle)
+	return stack.complete()
+}
+
 fun main() {
-	println(
-		generateSequence(::readLine).toList()
-			.map(String::toCharArray)
-			.map(::checkLine)
-			.filterNotNull()
-			.sumOf { it ->
-				println(it)
-				when (it) {
-					')' -> 3
-					']' -> 57
-					'}' -> 1197
-					'>' -> 25137
-					else -> Int.MAX_VALUE
+	val scores = generateSequence(::readLine).toList()
+		.map(String::toCharArray)
+		.filter { it -> checkLine(it) == null }
+		.map(::complete)
+//		.map{ it.joinToString("") }
+		.map { chars ->
+			chars.fold(0L) { s, c ->
+				s * 5L + when (c) {
+					')' -> 1L
+					']' -> 2L
+					'}' -> 3L
+					'>' -> 4L
+					else -> Long.MIN_VALUE
 				}
 			}
-	)
+		}
+		.sorted()
+	println(scores)
+	println(scores[scores.size/2])
 }
