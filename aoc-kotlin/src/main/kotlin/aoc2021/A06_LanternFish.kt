@@ -1,6 +1,6 @@
 package aoc2021
 
-fun advance(counts: Map<Int, Long>): Map<Int, Long> {
+private fun advance(counts: Map<Int, Long>): Map<Int, Long> {
 	return counts.entries.fold(mutableMapOf()) { nc, entry ->
 		val (stage, count) = entry
 		if (stage > 0) {
