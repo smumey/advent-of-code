@@ -1,31 +1,35 @@
 package aoc2021
 
+import kotlin.collections.ArrayDeque
+
 private fun isSmall(loc: String): Boolean {
 	return loc.all(Char::isLowerCase)
 }
 
-private fun allowAdd(newPath: List<String>, start: String): Boolean {
-	val loc = newPath.last()
+private fun allowAdd(newPath: Pair<List<String>, Map<String, Int>>, start: String): Boolean {
+	val loc = newPath.first.last()
 	return if (loc == start) false
 	else if (isSmall(loc)) {
-		val smalls = newPath.subList(1, newPath.size).filter(::isSmall)
-		smalls.toSet().size >= smalls.size - 1
+		newPath.second.count { e -> e.value > 1 } < 2 && newPath.second.all { e -> e.value < 2 }
 	} else true
+}
+
+private fun addCount(map: Map<String, Int>, loc: String): Map<String, Int> {
+	val newMap = map.toMutableMap()
+	newMap.merge(loc, 1, Int::plus)
+	return newMap
 }
 
 private fun search(start: String, finish: String, locMap: Map<String, Set<String>>): List<List<String>> {
 	val routes = mutableListOf<List<String>>()
-	val paths = mutableListOf(listOf(start))
+	val paths = ArrayDeque(listOf(Pair(listOf(start), mapOf<String, Int>())))
 	while (paths.isNotEmpty()) {
 		val path = paths.removeFirst()
-//		println(path)
-		for (loc in locMap.getOrDefault(path.last(), listOf())) {
-			val newPath = path + loc
+		for (loc in locMap.getOrDefault(path.first.last(), listOf())) {
+			val newPath = Pair(path.first + loc, if(isSmall(loc)) addCount(path.second, loc) else path.second)
 			if (loc == finish) {
-//				println("adding route $newPath")
-				routes.add(newPath)
+				routes.add(newPath.first)
 			} else if (allowAdd(newPath, start)) {
-//				println("adding path $newPath")
 				paths.add(newPath)
 			}
 		}
@@ -58,6 +62,5 @@ fun main() {
 			}
 			m
 		}
-	println(locMap)
 	println(search("start", "end", locMap).size)
 }
