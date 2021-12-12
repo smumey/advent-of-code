@@ -10,7 +10,7 @@ private fun allowAdd(newPath: Pair<List<String>, Map<String, Int>>, start: Strin
 	val loc = newPath.first.last()
 	return if (loc == start) false
 	else if (isSmall(loc)) {
-		newPath.second.count { e -> e.value > 1 } < 2 && newPath.second.all { e -> e.value < 2 }
+		newPath.second.count { e -> e.value > 1 } < 2 && newPath.second.all { e -> e.value <= 2 }
 	} else true
 }
 
