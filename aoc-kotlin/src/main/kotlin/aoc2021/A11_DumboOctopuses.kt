@@ -33,7 +33,6 @@ private data class OctopusGrid(val rows: List<List<Int>>, val step: Int, val fla
 
 	fun advance(): OctopusGrid {
 		val grid = beginStep()
-		// println("${grid.step}: triggered ${grid.flashed}" )
 		return grid.rows.foldIndexed(grid) { j, g, row ->
 			row.foldIndexed(g) { i, h, _ ->
 				h.trigger(Pair(j, i))
