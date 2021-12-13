@@ -2,9 +2,9 @@ package aoc2021
 
 import kotlin.math.abs
 
-data class Point(val x: Int, val y: Int)
+private data class Point(val x: Int, val y: Int)
 
-data class Line(val begin: Point, val end: Point) {
+private data class Line(val begin: Point, val end: Point) {
 
 	private fun isVertical(): Boolean {
 		return begin.x == end.x;
@@ -36,13 +36,13 @@ data class Line(val begin: Point, val end: Point) {
 	}
 }
 
-fun signum(i: Int): Int = if (i < 0) -1 else if (i > 0) 1 else 0
+private fun signum(i: Int): Int = if (i < 0) -1 else if (i > 0) 1 else 0
 
-fun toRange(x: Int, y: Int): IntRange {
+private fun toRange(x: Int, y: Int): IntRange {
 	return if (x < y) x..y else y..x
 }
 
-fun parseLine(line: String): Line {
+private fun parseLine(line: String): Line {
 	val (p1, p2) = line.split(" -> ")
 		.map { p ->
 			val (x, y) = p.split(",").map(String::toInt)
