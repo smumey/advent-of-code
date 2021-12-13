@@ -12,6 +12,24 @@ private fun reflectX(points: Set<Point>, line: Int): Set<Point> {
 		.toSet()
 }
 
+private fun toGrid(points: Set<Point>): List<List<Char>> {
+	val xRange = points.fold(IntRange(Int.MAX_VALUE, Int.MIN_VALUE)) { range, p ->
+		val newMin = if(p.x < range.first) p.x else range.first
+		val newMax = if(range.last < p.x) p.x else range.last
+		newMin..newMax
+	}
+	val yRange = points.fold(IntRange(Int.MAX_VALUE, Int.MIN_VALUE)) { range, p ->
+		val newMin = if(p.y < range.first) p.y else range.first
+		val newMax = if(range.last < p.y) p.y else range.last
+		newMin..newMax
+	}
+	return yRange.map { y ->
+		xRange.map { x ->
+			if(points.contains(Point(x, y))) '#' else ' '
+		}
+	}
+}
+
 val foldRe = "^fold along ([xy])=(\\d+)".toRegex()
 
 fun main() {
@@ -19,11 +37,10 @@ fun main() {
 	val points = lines
 		.takeWhile(String::isNotEmpty)
 		.map { l ->
-			var (x, y) = l.split(",").map(String::toInt)
+			val (x, y) = l.split(",").map(String::toInt)
 			Point(x, y)
 		}.toSet()
-	println(points)
-	val folds = lines.map {
+	val folds = lines.mapNotNull {
 		val match = foldRe.find(it)
 		if (match == null) null
 		else {
@@ -35,6 +52,9 @@ fun main() {
 				else -> null
 			}
 		}
-	}.filterNotNull()
-	println(folds.first()(points).count())
+	}
+
+	toGrid(folds.fold(points) { p, f -> f(p) }).forEach { line ->
+		println(line.joinToString(""))
+	}
 }
