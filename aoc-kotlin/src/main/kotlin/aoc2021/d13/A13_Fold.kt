@@ -3,13 +3,11 @@ package aoc2021.d13
 private data class Point(val x: Int, val y: Int)
 
 private fun reflectY(points: Set<Point>, line: Int): Set<Point> {
-	return points.map { if (it.y > line) Point(it.x, line - (it.y - line)) else it }
-		.toSet()
+	return points.map { if (it.y > line) Point(it.x, line - (it.y - line)) else it }.toSet()
 }
 
 private fun reflectX(points: Set<Point>, line: Int): Set<Point> {
-	return points.map { if (it.x > line) Point(line - (it.x - line), it.y) else it }
-		.toSet()
+	return points.map { if (it.x > line) Point(line - (it.x - line), it.y) else it }.toSet()
 }
 
 private fun toGrid(points: Set<Point>): List<List<Char>> {
