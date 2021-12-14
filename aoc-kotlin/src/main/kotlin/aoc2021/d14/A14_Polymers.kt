@@ -5,26 +5,26 @@ private fun step(pairCounts: Map<String, Long>, rules: Map<String, List<String>>
 		val pair = entry.key
 		val counts = c.toMutableMap()
 		val pairs = rules.getOrDefault(pair, listOf(pair))
-		pairs.forEach { p -> counts.merge(p, entry.value) { old, new -> new + old } }
+		pairs.forEach { p -> counts.merge(p, entry.value, Long::plus) }
 		counts
 	}
 }
 
 private fun toPairCounts(polymer: String): Map<String, Long> {
 	return polymer.foldIndexed(mapOf()) { i, map, _ ->
-		val m = map.toMutableMap()
 		if (i < polymer.length - 1) {
 			val pair = polymer.substring(i, i + 2)
-			m.merge(pair, 1) { c1, c2 -> c1 + c2 }
+			val m = map.toMutableMap()
+			m.merge(pair, 1, Long::plus)
 			m
-		} else m
+		} else map
 	}
 }
 
 private fun toElementCounts(polymer: String, pairCounts: Map<String, Long>): Map<Char, Long> {
 	val elCounts = mutableMapOf<Char, Long>()
-	pairCounts.forEach() { entry -> elCounts.merge(entry.key[0], entry.value) { c1, c2 -> c1 + c2 } }
-	elCounts.merge(polymer[polymer.length - 1], 1) { c1, c2 -> c1 + c2 }
+	pairCounts.forEach() { entry -> elCounts.merge(entry.key[0], entry.value, Long::plus) }
+	elCounts.merge(polymer[polymer.length - 1], 1, Long::plus)
 	return elCounts
 }
 
