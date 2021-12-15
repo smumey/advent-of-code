@@ -1,49 +1,72 @@
 package aoc2021.d15
 
+import java.time.Duration
+import java.time.Instant
 import java.util.*
-import kotlin.collections.ArrayDeque
 
 data class Point(val x: Int, val y: Int)
 
-fun cost(grid: List<List<Int>>, path: List<Point>): Int {
-	return path.subList(1, path.size).sumOf { grid[it.y][it.x] }
+fun isInGrid(point: Point, maxPoint: Point): Boolean {
+	return point.x in 0.. maxPoint.x &&
+			point.y in 0.. maxPoint.y
 }
 
-fun isInGrid(grid: List<List<Int>>, point: Point): Boolean {
-	return point.x in grid.first().indices &&
-			point.y in grid.indices
-}
-
-fun neighbours(grid: List<List<Int>>, point: Point): Set<Point> {
+fun neighbours(point: Point, maxPoint: Point): Set<Point> {
 	return sequenceOf(
 		Point(point.x - 1, point.y),
 		Point(point.x + 1, point.y),
 		Point(point.x, point.y - 1),
 		Point(point.x, point.y + 1)
 	)
-		.filter { isInGrid(grid, it) }
+		.filter { isInGrid(it, maxPoint) }
 		.toSet()
 }
 
+fun risk(grid: List<List<Int>>, point: Point): Int {
+	val tileHeight = grid.size
+	val tileWidth = grid.first().size
+	return (grid[point.y % tileHeight][point.x % tileWidth] + point.x / tileWidth + point.y / tileHeight - 1) % 9 + 1
+}
+
+fun findLowestDistancePoint(points: Set<Point>, distances: List<IntArray>): Point? {
+	var lowestDistancePoint: Point? = null
+	var lowestDistance = Int.MAX_VALUE
+	for (p in points) {
+		val dist = distances[p.y][p.x]
+		if (dist < lowestDistance) {
+			lowestDistance = dist
+			lowestDistancePoint = p
+		}
+	}
+	return lowestDistancePoint
+}
+
 fun findRoute(grid: List<List<Int>>): Pair<List<Point>, Int> {
-	val distances = grid.map { r -> r.map { Int.MAX_VALUE }.toIntArray() }
+	val yRange = 0 until grid.size * 5
+	val xRange = 0 until grid[0].size * 5
+	val destination = Point(xRange.last, yRange.last)
+	val distances = yRange.map { xRange.map { Int.MAX_VALUE }.toIntArray() }.toList()
 	distances[0][0] = 0
-	val previous = grid.map { r -> r.map { null as Point? }.toMutableList() }
-	val queue = ArrayDeque(grid.indices.flatMap { y -> grid[0].indices.map { x -> Point(x, y)}.toList() })
-	while (queue.isNotEmpty()) {
-		val p = queue.removeFirst()
-		neighbours(grid, p)
-			.filter(queue::contains)
+	val previous = yRange.map { xRange.map { null as Point? }.toMutableList() }.toList()
+	val settled = mutableSetOf<Point>()
+	val unsettled = mutableSetOf(Point(0,0))
+	while (unsettled.isNotEmpty()) {
+		val p = findLowestDistancePoint(unsettled, distances) ?: throw(IllegalStateException())
+		unsettled.remove(p)
+		neighbours(p, destination)
+			.filter{ !settled.contains(it)}
 			.forEach {
-				val dist = distances[p.y][p.x] + grid[it.y][it.x]
+				val dist = distances[p.y][p.x] + risk(grid, it)
 				if (dist < distances[it.y][it.x]) {
 					distances[it.y][it.x] = dist
 					previous[it.y][it.x] = p
 				}
+				unsettled.add(it)
 			}
+		settled.add(p)
 	}
 	return Pair(
-		(generateSequence(previous.last().last() ?: Point(0, 0)) { (previous[it.y][it.x]) }).toList().reversed(),
+		(generateSequence(destination ?: Point(0, 0)) { (previous[it.y][it.x]) }).toList().reversed(),
 		distances.last().last()
 	)
 }
@@ -52,5 +75,8 @@ fun main() {
 	val grid = generateSequence(::readLine).map { l ->
 		l.map { it.digitToInt() }
 	}.toList()
-	print(findRoute(grid))
+	val start = Instant.now()
+	val route = findRoute(grid)
+	println(Duration.between(start, Instant.now()))
+	print(route)
 }
