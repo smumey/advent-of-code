@@ -1,6 +1,5 @@
 package aoc2021.d16
 
-import java.math.BigInteger
 import java.util.function.Function
 
 const val HEADER_LENGTH = 6
@@ -23,12 +22,6 @@ fun toBinaryString(input: IntArray): String {
 		}
 		builder
 	}.toString()
-}
-
-fun toBigInt(input: String): BigInteger {
-	return input.fold(BigInteger.ZERO) { n, bit ->
-		n.times(BigInteger.TWO).plus(if (bit == '1') BigInteger.ONE else BigInteger.ZERO)
-	}
 }
 
 fun toLong(input: String): Long {
@@ -61,33 +54,29 @@ fun main() {
 abstract class Packet(val version: Long, val type: Long) {
 	abstract val length: Long
 	abstract val subpackets: List<Packet>
-	abstract fun evaluate(): BigInteger
+	abstract fun evaluate(): Long
 	override fun toString(): String {
-		return "Packet(version=$version, type=$type, length=$length, subpackets=$subpackets)"
+		return "Packet(version=$version, type=$type, length=$length, subpackets=$subpackets, value=${evaluate()})"
 	}
 }
 
 class LiteralPacket(version: Long, type: Long, bits: String) : Packet(version, type) {
-	val value: BigInteger
+	val value: Long
 	override val length: Long
 	override val subpackets = listOf<Packet>()
-	override fun evaluate(): BigInteger {
+	override fun evaluate(): Long {
 		return value
-	}
-
-	override fun toString(): String {
-		return super.toString() + " value=" + value
 	}
 
 	init {
 		var start = bits
-		var v = BigInteger.ZERO
-		val mult = BigInteger.valueOf(256)
+		var v = 0L
+		val mult = 16L
 		var len = HEADER_LENGTH.toLong()
 		do {
 			val chunk = readChunk(start)
 			start = start.substring(5)
-			v = v * mult + BigInteger.valueOf(chunk.second)
+			v = v * mult + chunk.second
 			len += 5
 		} while (chunk.first)
 		value = v
@@ -105,44 +94,44 @@ class OperatorPacket(version: Long, type: Long, bits: String) : Packet(version, 
 	val lengthType: Long
 	override val length: Long
 	override val subpackets: List<Packet>
-	override fun evaluate(): BigInteger {
+	override fun evaluate(): Long {
 		return fromCode(type).apply(subpackets)
 	}
 
-	enum class Operator(val code: Long) : Function<List<Packet>, BigInteger> {
+	enum class Operator(val code: Long) : Function<List<Packet>, Long> {
 		SUM(0L) {
-			override fun apply(packets: List<Packet>): BigInteger {
+			override fun apply(packets: List<Packet>): Long {
 				return packets.sumOf(Packet::evaluate)
 			}
 		},
 		PRODUCT(1L) {
-			override fun apply(packets: List<Packet>): BigInteger {
-				return packets.map(Packet::evaluate).fold(BigInteger.ONE) { prod, v -> prod.times(v) }
+			override fun apply(packets: List<Packet>): Long {
+				return packets.map(Packet::evaluate).fold(1L) { prod, v -> prod.times(v) }
 			}
 		},
 		MINIMUM(2L) {
-			override fun apply(packets: List<Packet>): BigInteger {
+			override fun apply(packets: List<Packet>): Long {
 				return packets.minOfOrNull(Packet::evaluate) ?: throw IllegalStateException("no min")
 			}
 		},
 		MAXIMUM(3L) {
-			override fun apply(packets: List<Packet>): BigInteger {
+			override fun apply(packets: List<Packet>): Long {
 				return packets.maxOfOrNull(Packet::evaluate) ?: throw IllegalStateException("no max")
 			}
 		},
 		GREATER_THAN(5L) {
-			override fun apply(packets: List<Packet>): BigInteger {
-				return if (packets.first().evaluate() > packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			override fun apply(packets: List<Packet>): Long {
+				return if (packets.first().evaluate() > packets.last().evaluate()) 1L else 0L
 			}
 		},
 		LESS_THAN(6L) {
-			override fun apply(packets: List<Packet>): BigInteger {
-				return if (packets.first().evaluate() < packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			override fun apply(packets: List<Packet>): Long {
+				return if (packets.first().evaluate() < packets.last().evaluate()) 1L else 0L
 			}
 		},
 		EQUAL_TO(7L) {
-			override fun apply(packets: List<Packet>): BigInteger {
-				return if (packets.first().evaluate() == packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			override fun apply(packets: List<Packet>): Long {
+				return if (packets.first().evaluate() == packets.last().evaluate()) 1L else 0L
 			}
 		}
 	}
