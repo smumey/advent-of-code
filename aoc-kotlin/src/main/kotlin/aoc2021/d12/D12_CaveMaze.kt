@@ -1,5 +1,8 @@
 package aoc2021.d12
 
+import java.time.Duration
+import kotlin.system.measureTimeMillis
+
 private fun isSmall(loc: String): Boolean {
 	return loc.all(Char::isLowerCase)
 }
@@ -60,5 +63,8 @@ fun main() {
 			}
 			m
 		}
-	println(search("start", "end", locMap).size)
+	val result: List<List<String>>
+	val time = measureTimeMillis { result = search("start", "end", locMap) }
+	println(result.size)
+	println(Duration.ofMillis(time))
 }
