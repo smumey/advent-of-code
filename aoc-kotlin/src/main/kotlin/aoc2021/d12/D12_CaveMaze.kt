@@ -3,35 +3,44 @@ package aoc2021.d12
 import java.time.Duration
 import kotlin.system.measureTimeMillis
 
+const val START = "start"
+const val FINISH = "end"
+
 private fun isSmall(loc: String): Boolean {
 	return loc.all(Char::isLowerCase)
 }
 
-private fun allowAdd(newPath: Pair<List<String>, Map<String, Int>>, start: String): Boolean {
-	val loc = newPath.first.last()
-	return if (loc == start) false
+fun allowSmallAdd(loc: String, currentSmalls: Pair<Boolean, Set<String>>): Boolean {
+	return !(currentSmalls.first && currentSmalls.second.contains(loc))
+}
+
+private fun allowAdd(path: Pair<List<String>, Pair<Boolean, Set<String>>>, loc: String): Boolean {
+	return if (loc == START) false
 	else if (isSmall(loc)) {
-		newPath.second.count { e -> e.value > 1 } < 2 && newPath.second.all { e -> e.value <= 2 }
+		allowSmallAdd(loc, path.second)
 	} else true
 }
 
-private fun addCount(map: Map<String, Int>, loc: String): Map<String, Int> {
-	val newMap = map.toMutableMap()
-	newMap.merge(loc, 1, Int::plus)
-	return newMap
+private fun addSmall(currentSmalls: Pair<Boolean, Set<String>>, loc: String): Pair<Boolean, Set<String>> {
+	return if (currentSmalls.first) {
+		Pair(true, currentSmalls.second + loc)
+	} else if (currentSmalls.second.contains(loc)) {
+		Pair(true, currentSmalls.second)
+	} else {
+		Pair(false, currentSmalls.second + loc)
+	}
 }
 
-private fun search(start: String, finish: String, locMap: Map<String, Set<String>>): List<List<String>> {
+private fun search(locMap: Map<String, Set<String>>): List<List<String>> {
 	val routes = mutableListOf<List<String>>()
-	val paths = ArrayDeque(listOf(Pair(listOf(start), mapOf<String, Int>())))
+	val paths = ArrayDeque(listOf(Pair(listOf(START), Pair(false, setOf<String>()))))
 	while (paths.isNotEmpty()) {
 		val path = paths.removeFirst()
 		for (loc in locMap.getOrDefault(path.first.last(), listOf())) {
-			val newPath = Pair(path.first + loc, if (isSmall(loc)) addCount(path.second, loc) else path.second)
-			if (loc == finish) {
-				routes.add(newPath.first)
-			} else if (allowAdd(newPath, start)) {
-				paths.add(newPath)
+			if (loc == FINISH) {
+				routes.add(path.first + loc)
+			} else if (allowAdd(path, loc)) {
+				paths.add(Pair(path.first + loc, if (isSmall(loc)) addSmall(path.second, loc) else path.second))
 			}
 		}
 	}
@@ -64,7 +73,8 @@ fun main() {
 			m
 		}
 	val result: List<List<String>>
-	val time = measureTimeMillis { result = search("start", "end", locMap) }
+	val time = measureTimeMillis { result = search(locMap) }
+	println(result)
 	println(result.size)
 	println(Duration.ofMillis(time))
 }
