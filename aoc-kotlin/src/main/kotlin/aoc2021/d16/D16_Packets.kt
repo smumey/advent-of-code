@@ -1,6 +1,7 @@
 package aoc2021.d16
 
 import java.math.BigInteger
+import java.util.function.Function
 
 const val HEADER_LENGTH = 6
 
@@ -54,12 +55,13 @@ fun sumVersions(packet: Packet): Long {
 }
 
 fun main() {
-	println(sumVersions(readPacketFromHex(readLine() ?: "")))
+	println(readPacketFromHex(readLine() ?: "").evaluate())
 }
 
 abstract class Packet(val version: Long, val type: Long) {
 	abstract val length: Long
 	abstract val subpackets: List<Packet>
+	abstract fun evaluate(): BigInteger
 	override fun toString(): String {
 		return "Packet(version=$version, type=$type, length=$length, subpackets=$subpackets)"
 	}
@@ -69,6 +71,10 @@ class LiteralPacket(version: Long, type: Long, bits: String) : Packet(version, t
 	val value: BigInteger
 	override val length: Long
 	override val subpackets = listOf<Packet>()
+	override fun evaluate(): BigInteger {
+		return value
+	}
+
 	override fun toString(): String {
 		return super.toString() + " value=" + value
 	}
@@ -99,6 +105,51 @@ class OperatorPacket(version: Long, type: Long, bits: String) : Packet(version, 
 	val lengthType: Long
 	override val length: Long
 	override val subpackets: List<Packet>
+	override fun evaluate(): BigInteger {
+		return fromCode(type).apply(subpackets)
+	}
+
+	enum class Operator(val code: Long) : Function<List<Packet>, BigInteger> {
+		SUM(0L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return packets.sumOf(Packet::evaluate)
+			}
+		},
+		PRODUCT(1L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return packets.map(Packet::evaluate).fold(BigInteger.ONE) { prod, v -> prod.times(v) }
+			}
+		},
+		MINIMUM(2L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return packets.minOfOrNull(Packet::evaluate) ?: throw IllegalStateException("no min")
+			}
+		},
+		MAXIMUM(3L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return packets.maxOfOrNull(Packet::evaluate) ?: throw IllegalStateException("no max")
+			}
+		},
+		GREATER_THAN(5L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return if (packets.first().evaluate() > packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			}
+		},
+		LESS_THAN(6L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return if (packets.first().evaluate() < packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			}
+		},
+		EQUAL_TO(7L) {
+			override fun apply(packets: List<Packet>): BigInteger {
+				return if (packets.first().evaluate() == packets.last().evaluate()) BigInteger.ONE else BigInteger.ZERO
+			}
+		}
+	}
+
+	private fun fromCode(code: Long): Operator {
+		return Operator.values().first { o -> o.code == code }
+	}
 
 	init {
 		lengthType = toLong(bits.substring(0, 1))

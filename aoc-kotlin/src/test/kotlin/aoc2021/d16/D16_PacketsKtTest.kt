@@ -1,5 +1,6 @@
 package aoc2021.d16
 
+import java.math.BigInteger
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -19,7 +20,48 @@ internal class D16_PacketsKtTest {
 	@Test
 	fun testSumVersions_2() {
 		val packet = readPacketFromHex("620080001611562C8802118E34")
-		println(packet)
 		assertEquals(12, sumVersions(packet))
+	}
+
+	@Test
+	fun testEvaluate_1() {
+		val packet = readPacketFromHex("C200B40A82")
+		assertEquals(BigInteger.valueOf(3L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_2() {
+		val packet = readPacketFromHex("04005AC33890")
+		assertEquals(BigInteger.valueOf(54L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_3() {
+		val packet = readPacketFromHex("CE00C43D881120")
+		assertEquals(BigInteger.valueOf(9L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_4() {
+		val packet = readPacketFromHex("D8005AC2A8F0")
+		assertEquals(BigInteger.valueOf(1L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_5() {
+		val packet = readPacketFromHex("F600BC2D8F")
+		assertEquals(BigInteger.valueOf(0L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_6() {
+		val packet = readPacketFromHex("9C005AC2F8F0")
+		assertEquals(BigInteger.valueOf(0L), packet.evaluate())
+	}
+
+	@Test
+	fun testEvaluate_7() {
+		val packet = readPacketFromHex("9C0141080250320F1802104A08")
+		assertEquals(BigInteger.valueOf(1L), packet.evaluate())
 	}
 }
