@@ -2,13 +2,12 @@ package aoc2021.d15
 
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 
 data class Point(val x: Int, val y: Int)
 
 fun isInGrid(point: Point, maxPoint: Point): Boolean {
-	return point.x in 0.. maxPoint.x &&
-			point.y in 0.. maxPoint.y
+	return point.x in 0..maxPoint.x &&
+			point.y in 0..maxPoint.y
 }
 
 fun neighbours(point: Point, maxPoint: Point): Set<Point> {
@@ -47,14 +46,14 @@ fun findRoute(grid: List<List<Int>>): Pair<List<Point>, Int> {
 	val destination = Point(xRange.last, yRange.last)
 	val distances = yRange.map { xRange.map { Int.MAX_VALUE }.toIntArray() }.toList()
 	distances[0][0] = 0
-	val previous = yRange.map { xRange.map { null as Point? }.toMutableList() }.toList()
+	val previous: List<MutableList<Point?>> = yRange.map { xRange.map { null as Point? }.toMutableList() }.toList()
 	val settled = mutableSetOf<Point>()
-	val unsettled = mutableSetOf(Point(0,0))
+	val unsettled = mutableSetOf(Point(0, 0))
 	while (unsettled.isNotEmpty()) {
 		val p = findLowestDistancePoint(unsettled, distances) ?: throw(IllegalStateException())
 		unsettled.remove(p)
 		neighbours(p, destination)
-			.filter{ !settled.contains(it)}
+			.filter { !settled.contains(it) }
 			.forEach {
 				val dist = distances[p.y][p.x] + risk(grid, it)
 				if (dist < distances[it.y][it.x]) {

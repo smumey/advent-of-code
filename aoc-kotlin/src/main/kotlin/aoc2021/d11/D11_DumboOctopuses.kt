@@ -1,4 +1,4 @@
-package aoc2021
+package aoc2021.d11
 
 private data class OctopusGrid(val rows: List<List<Int>>, val step: Int, val flashed: Int) {
 	val gridHeight: Int = rows.size
@@ -17,7 +17,7 @@ private data class OctopusGrid(val rows: List<List<Int>>, val step: Int, val fla
 	fun beginStep(): OctopusGrid {
 		return OctopusGrid(this.rows.map { r ->
 			r.map { c -> if (c > 9) 0 else c }
-		}, step + 1,0)
+		}, step + 1, 0)
 	}
 
 	fun updateGrid(cell: Pair<Int, Int>, value: Int): OctopusGrid {

@@ -12,18 +12,18 @@ private fun reflectX(points: Set<Point>, line: Int): Set<Point> {
 
 private fun toGrid(points: Set<Point>): List<List<Char>> {
 	val xRange = points.fold(IntRange(Int.MAX_VALUE, Int.MIN_VALUE)) { range, p ->
-		val newMin = if(p.x < range.first) p.x else range.first
-		val newMax = if(range.last < p.x) p.x else range.last
+		val newMin = if (p.x < range.first) p.x else range.first
+		val newMax = if (range.last < p.x) p.x else range.last
 		newMin..newMax
 	}
 	val yRange = points.fold(IntRange(Int.MAX_VALUE, Int.MIN_VALUE)) { range, p ->
-		val newMin = if(p.y < range.first) p.y else range.first
-		val newMax = if(range.last < p.y) p.y else range.last
+		val newMin = if (p.y < range.first) p.y else range.first
+		val newMax = if (range.last < p.y) p.y else range.last
 		newMin..newMax
 	}
 	return yRange.map { y ->
 		xRange.map { x ->
-			if(points.contains(Point(x, y))) '#' else ' '
+			if (points.contains(Point(x, y))) '#' else ' '
 		}
 	}
 }

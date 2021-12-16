@@ -1,4 +1,4 @@
-package aoc2021
+package aoc2021.d09
 
 private data class HeightPoint(val x: Int, val y: Int, val height: Int) {
 

@@ -1,4 +1,4 @@
-package aoc2021
+package aoc2021.d08
 
 data class Reading(val inputs: Set<String>, val outputs: List<String>)
 

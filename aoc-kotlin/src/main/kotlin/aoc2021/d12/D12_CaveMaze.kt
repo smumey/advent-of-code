@@ -1,6 +1,4 @@
-package aoc2021
-
-import kotlin.collections.ArrayDeque
+package aoc2021.d12
 
 private fun isSmall(loc: String): Boolean {
 	return loc.all(Char::isLowerCase)
@@ -26,7 +24,7 @@ private fun search(start: String, finish: String, locMap: Map<String, Set<String
 	while (paths.isNotEmpty()) {
 		val path = paths.removeFirst()
 		for (loc in locMap.getOrDefault(path.first.last(), listOf())) {
-			val newPath = Pair(path.first + loc, if(isSmall(loc)) addCount(path.second, loc) else path.second)
+			val newPath = Pair(path.first + loc, if (isSmall(loc)) addCount(path.second, loc) else path.second)
 			if (loc == finish) {
 				routes.add(newPath.first)
 			} else if (allowAdd(newPath, start)) {

@@ -1,4 +1,4 @@
-package aoc2021
+package aoc2021.d06
 
 private fun advance(counts: Map<Int, Long>): Map<Int, Long> {
 	return counts.entries.fold(mutableMapOf()) { nc, entry ->

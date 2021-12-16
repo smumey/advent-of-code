@@ -1,4 +1,4 @@
-package aoc2021
+package aoc2021.d10
 
 private class Stack {
 	private val content = mutableListOf<Char>()
@@ -75,5 +75,5 @@ fun main() {
 		}
 		.sorted()
 	println(scores)
-	println(scores[scores.size/2])
+	println(scores[scores.size / 2])
 }
