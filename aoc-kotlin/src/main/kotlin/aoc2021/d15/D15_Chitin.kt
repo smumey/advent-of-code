@@ -1,7 +1,7 @@
 package aoc2021.d15
 
 import java.time.Duration
-import java.time.Instant
+import kotlin.system.measureTimeMillis
 
 data class Point(val x: Int, val y: Int)
 
@@ -74,8 +74,8 @@ fun main() {
 	val grid = generateSequence(::readLine).map { l ->
 		l.map { it.digitToInt() }
 	}.toList()
-	val start = Instant.now()
-	val route = findRoute(grid)
-	println(Duration.between(start, Instant.now()))
-	print(route)
+	val route: Pair<List<Point>, Int>
+	val time = measureTimeMillis { route = findRoute(grid) }
+	println(route)
+	println(Duration.ofMillis(time))
 }
