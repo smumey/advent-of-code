@@ -3,6 +3,7 @@ package aoc2021.d18
 interface Number {
 	fun explodeValue(): Long
 	fun magnitude(): Long
+	fun deepCopy(): Number
 }
 
 data class RegularNumber(var value: Long) : Number {
@@ -22,6 +23,10 @@ data class RegularNumber(var value: Long) : Number {
 	}
 
 	override fun magnitude(): Long = value
+
+	override fun deepCopy(): Number {
+		return RegularNumber(value)
+	}
 }
 
 data class SnailfishNumber(var left: Number, var right: Number) : Number {
@@ -32,7 +37,11 @@ data class SnailfishNumber(var left: Number, var right: Number) : Number {
 	}
 
 	fun add(other: SnailfishNumber): SnailfishNumber {
-		return SnailfishNumber(this.copy(), other.copy())
+		return SnailfishNumber(this.deepCopy(), other.deepCopy())
+	}
+
+	override fun deepCopy(): Number {
+		return SnailfishNumber(left.deepCopy(), right.deepCopy())
 	}
 
 	private fun swap(from: Number, to: Number) {
@@ -162,11 +171,22 @@ fun parse(string: String): SnailfishNumber {
 	return n
 }
 
+fun largestSum(numbers: List<SnailfishNumber>): Long? {
+	return numbers.flatMap { first ->
+		numbers.mapNotNull { second ->
+			if (first == second) null
+			else {
+				val magnitude = (first + second).magnitude()
+				magnitude
+			}
+		}
+	}.maxOrNull()
+}
+
 fun main() {
-	println(
-		generateSequence(::readLine)
-			.map(::parse)
-			.reduce(SnailfishNumber::plus)
-			.magnitude()
-	)
+	val numbers = generateSequence(::readLine)
+		.map(::parse)
+		.toList()
+
+	println(largestSum(numbers))
 }
