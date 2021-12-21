@@ -1,7 +1,9 @@
 package aoc2021.d19
 
+import java.time.Duration
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.system.measureTimeMillis
 
 typealias Translation = (Point) -> Point
 
@@ -188,5 +190,9 @@ fun findMaxManhattanDistances(scanners: List<Scanner>): Long {
 
 fun main() {
 	val scanners = parse(generateSequence(::readLine).asIterable())
-	println(findMaxManhattanDistances(scanners))
+	val maxDist: Long
+	println(Duration.ofMillis(measureTimeMillis {
+		maxDist = findMaxManhattanDistances(scanners)
+	}))
+	println(maxDist)
 }
