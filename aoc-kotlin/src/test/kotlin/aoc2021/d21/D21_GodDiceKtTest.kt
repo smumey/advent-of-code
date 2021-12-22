@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 internal class D21_GodDiceKtTest {
 	@Test
 	fun testCalculateProduct() {
-		assertEquals(739785, calculateProduct(listOf(3, 8)))
+		val (turns, endState) = calculateGameStates(listOf(4, 8)).last()
+		assertEquals(444356092776315L, findMostWins(endState))
 	}
 }
