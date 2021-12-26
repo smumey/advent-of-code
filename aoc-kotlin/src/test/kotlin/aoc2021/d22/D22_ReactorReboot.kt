@@ -1,58 +1,80 @@
 package aoc2021.d22
 
+import java.lang.Integer.max
+import java.lang.Integer.min
 import java.time.Duration
-import java.util.BitSet
 import kotlin.system.measureTimeMillis
 
-data class Point(val x: Int, val y: Int, val z: Int) {
-	operator fun minus(other: Point): Point {
-		return Point(x - other.x, y - other.y, z - other.z)
-	}
-}
-
-data class RebootStep(val toggle: Boolean, val xRange: IntRange, val yRange: IntRange, val zRange: IntRange)
-
-fun initCubesRegion(sideRange: IntRange): CubesRegion {
-	val dim = sideRange.count()
-	return CubesRegion(BitSet(dim * dim * dim), sideRange)
-}
-
-data class CubesRegion(val bits: BitSet, val sideRange: IntRange) {
-	private val dim = sideRange.count()
-	val min = sideRange.first
-	private val minPoint = Point(sideRange.first, sideRange.first, sideRange.first)
-
-	fun fromPoint(p: Point): Int {
-		val nP = p - minPoint
-		return nP.z * dim * dim + nP.y * dim + nP.x
-	}
-
-	fun fromPoint(x: Int, y: Int, z: Int): Int {
-		return fromPoint(Point(x, y, z))
-	}
-
-	fun reboot(step: RebootStep): CubesRegion {
-		val newBits = BitSet(bits.size())
-		newBits.or(bits)
-		return CubesRegion(
-			step.zRange.intersect(sideRange).fold(newBits) { bitsZ, z ->
-				step.yRange.intersect(sideRange).fold(bitsZ) { bitsY, y ->
-					step.xRange.intersect(sideRange).fold(bitsY) { bitsX, x ->
-						bitsX.set(fromPoint(x, y, z), step.toggle)
-						bitsX
-					}
-				}
-			},
-			sideRange
+data class Region(val xRange: IntRange, val yRange: IntRange, val zRange: IntRange) {
+	fun intersection(other: Region): Region? {
+		val intersection = Region(
+			max(xRange.first, other.xRange.first)..min(xRange.last, other.xRange.last),
+			max(yRange.first, other.yRange.first)..min(yRange.last, other.yRange.last),
+			max(zRange.first, other.zRange.first)..min(zRange.last, other.zRange.last),
 		)
+		return if (
+			intersection.xRange.first <= intersection.xRange.last &&
+			intersection.yRange.first <= intersection.yRange.last &&
+			intersection.zRange.first <= intersection.zRange.last
+		) intersection
+		else null
 	}
 
-	fun reboot(steps: List<RebootStep>): CubesRegion {
-		return steps.fold(this) { c, r -> c.reboot(r) }
+	fun contains(other: Region): Boolean {
+		return xRange.first <= other.xRange.first && other.xRange.last <= xRange.last &&
+				yRange.first <= other.yRange.first && other.yRange.last <= yRange.last &&
+				zRange.first <= other.zRange.first && other.zRange.last <= zRange.last
 	}
 
-	fun count(): Int {
-		return bits.cardinality()
+	fun volume(): Long {
+		return (xRange.last - xRange.first + 1).toLong() *
+				(yRange.last - yRange.first + 1).toLong() *
+				(zRange.last - zRange.first + 1).toLong()
+	}
+}
+
+data class RebootStep(val setOn: Boolean, val region: Region) {
+	fun process(other: RebootStep): RebootStep? {
+		val intersection = region.intersection(other.region)
+		return if (intersection == null) {
+			null
+		} else if (this.setOn && other.setOn) {
+			RebootStep(false, intersection)
+		} else if (this.setOn && !other.setOn) {
+			RebootStep(false, intersection)
+		} else if (!this.setOn && other.setOn) {
+			RebootStep(true, intersection)
+		} else {
+			RebootStep(true, intersection)
+		}
+	}
+
+	fun value(): Long {
+		return (if (setOn) 1L else -1L) * region.volume()
+	}
+}
+
+fun initReactor(): Reactor {
+	return Reactor(listOf())
+}
+
+data class Reactor(val steps: List<RebootStep>) {
+	fun reboot(step: RebootStep): Reactor {
+		val nextSteps = steps.toMutableList()
+		if (step.setOn) {
+			nextSteps.add(step)
+		}
+		nextSteps.addAll(steps.mapNotNull { it.process(step) }.toList())
+		return Reactor(nextSteps)
+	}
+
+	fun reboot(steps: List<RebootStep>): Reactor {
+		val result = steps.fold(this) { c, r -> c.reboot(r) }
+		return result
+	}
+
+	fun count(): Long {
+		return steps.map(RebootStep::value).sum()
 	}
 }
 
@@ -64,9 +86,11 @@ fun parse(lines: Iterable<String>): List<RebootStep> {
 		rebootRe.find(it)?.let { m ->
 			RebootStep(
 				m.groupValues[1] == "on",
-				m.groupValues[2].toInt()..m.groupValues[3].toInt(),
-				m.groupValues[4].toInt()..m.groupValues[5].toInt(),
-				m.groupValues[6].toInt()..m.groupValues[7].toInt()
+				Region(
+					m.groupValues[2].toInt()..m.groupValues[3].toInt(),
+					m.groupValues[4].toInt()..m.groupValues[5].toInt(),
+					m.groupValues[6].toInt()..m.groupValues[7].toInt()
+				)
 			)
 		}
 	}.toList()
@@ -74,8 +98,8 @@ fun parse(lines: Iterable<String>): List<RebootStep> {
 
 fun main() {
 	val steps = parse(generateSequence(::readLine).asIterable())
-	val region = initCubesRegion(-50..50)
-	val count: Int
+	val region = initReactor()
+	val count: Long
 	println(Duration.ofMillis(measureTimeMillis { count = region.reboot(steps).count() }))
 	println(count)
 }
