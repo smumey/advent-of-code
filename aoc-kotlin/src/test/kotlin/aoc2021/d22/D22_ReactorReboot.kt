@@ -36,17 +36,7 @@ data class Region(val xRange: IntRange, val yRange: IntRange, val zRange: IntRan
 data class RebootStep(val setOn: Boolean, val region: Region) {
 	fun process(other: RebootStep): RebootStep? {
 		val intersection = region.intersection(other.region)
-		return if (intersection == null) {
-			null
-		} else if (this.setOn && other.setOn) {
-			RebootStep(false, intersection)
-		} else if (this.setOn && !other.setOn) {
-			RebootStep(false, intersection)
-		} else if (!this.setOn && other.setOn) {
-			RebootStep(true, intersection)
-		} else {
-			RebootStep(true, intersection)
-		}
+		return if (intersection == null) null else RebootStep(!this.setOn, intersection)
 	}
 
 	fun value(): Long {
