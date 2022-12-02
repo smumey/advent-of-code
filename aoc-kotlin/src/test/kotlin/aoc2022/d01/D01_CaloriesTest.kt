@@ -26,6 +26,7 @@ internal class D01_CaloriesTest {
         assertEquals(24000, findMaximum(parse(INPUT.asSequence())))
 	}
 
+    @Test
     fun findSumOfTop3() {
         assertEquals(45000, findSumOfTop3(parse(INPUT.asSequence())))
     }
