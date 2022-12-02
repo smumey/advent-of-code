@@ -11,7 +11,12 @@ internal class D02_RpsTest {
     """.trimIndent().lines()
 
     @Test
-    fun evaluate() {
-        assertEquals(15, evaluate(INPUT.asSequence().map {l -> parse(l) }))
+    fun evaluateRounds() {
+        assertEquals(15, evaluateRounds(INPUT.asSequence().map { l -> parse(l) }))
+    }
+
+    @Test
+    fun evaluatePlans() {
+        assertEquals(12, evaluatePlans(INPUT.asSequence().map { l -> parsePlan(l) }))
     }
 }

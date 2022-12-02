@@ -1,7 +1,5 @@
 package aoc2022.d02
 
-import aoc2022.d01.findSumOfTop3
-
 enum class Choice(val points: Int) {
     ROCK(1),
     PAPER(2),
@@ -17,6 +15,10 @@ enum class Choice(val points: Int) {
     }
 }
 
+enum class Strategy {
+    LOSE, DRAW, WIN
+}
+
 data class Round(val opponentChoice: Choice, val choice: Choice) {
     fun score() = choice.score(opponentChoice)
 }
@@ -26,10 +28,22 @@ fun parse(line: String): Round {
     return Round(Choice.values()[opponentLetter[0]-'A'], Choice.values()[myLetter[0]-'X'])
 }
 
-fun evaluate(rounds: Sequence<Round>): Int {
+fun evaluateRounds(rounds: Sequence<Round>): Int {
     return rounds.sumOf(Round::score)
 }
 
+data class Plan(val opponentChoice: Choice, val strategy: Strategy)  {
+    fun score() = Choice.values()[(opponentChoice.ordinal + strategy.ordinal)%3].score(opponentChoice)
+}
+
+fun parsePlan(line: String): Plan {
+    val (opponentLetter, myLetter) = line.split(" ")
+    return Plan(Choice.values()[opponentLetter[0]-'A'], Strategy.values()[(myLetter[0]-'X' + 2) % 3])
+}
+fun evaluatePlans(plans: Sequence<Plan>): Int {
+    return plans.sumOf(Plan::score)
+}
+
 fun main() {
-    println(evaluate(generateSequence(::readLine).map { parse(it) }))
+    println(evaluatePlans(generateSequence(::readLine).map { parsePlan(it) }))
 }
