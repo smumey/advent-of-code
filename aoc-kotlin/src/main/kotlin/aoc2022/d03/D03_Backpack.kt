@@ -32,7 +32,7 @@ fun findBadge(backpacks: List<Backpack>) =
 fun main() {
     println(
         splitIntoGroups(readInput("aoc2022/3").map { parse(it) })
-            .mapNotNull { findBadge(it) }
-            .sumOf { priority(it) }
+            .mapNotNull(::findBadge)
+            .sumOf(::priority)
     )
 }
