@@ -12,4 +12,10 @@ class D05_StacksKtTest {
 		println(input.second)
 		assertEquals("CMZ", applyMoves(input.first, input.second).message())
 	}
+
+	@Test
+	fun messageBatch() {
+		println(input.second)
+		assertEquals("MCD", applyBatchMoves(input.first, input.second).message())
+	}
 }

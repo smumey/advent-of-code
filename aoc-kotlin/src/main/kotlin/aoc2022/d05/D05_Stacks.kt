@@ -21,10 +21,20 @@ data class StackState(val stacks: List<List<Char>>) {
 				}
 			}
 		)
-		println("source $source target $target")
-		println("before $this")
-		println("after $stackState")
 		return stackState
+	}
+
+	fun moveBatch(move: Move): StackState {
+		return StackState(
+			stacks.mapIndexed { i, stack ->
+				when (i) {
+					move.source -> stack.take(stack.size - move.count)
+					move.target -> stack + stacks[move.source].takeLast(move.count)
+					else -> stack
+				}
+			}
+		)
+
 	}
 
 	fun message(): String {
@@ -67,7 +77,11 @@ fun applyMoves(stackState: StackState, moves: List<Move>): StackState {
 	return moves.fold(stackState) { state, move -> move.apply(state) }
 }
 
+fun applyBatchMoves(stackState: StackState, moves: List<Move>): StackState {
+	return moves.fold(stackState) { state, move -> state.moveBatch(move) }
+}
+
 fun main() {
 	var input = parse(readInput("aoc2022/5"))
-	println(applyMoves(input.first, input.second).message())
+	println(applyBatchMoves(input.first, input.second).message())
 }
