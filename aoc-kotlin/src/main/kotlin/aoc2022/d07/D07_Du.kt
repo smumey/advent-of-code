@@ -1,5 +1,6 @@
 package aoc2022.d07
 
+import kotlin.math.min
 import readInput
 
 class Directory(val parent: Directory?) {
@@ -7,6 +8,10 @@ class Directory(val parent: Directory?) {
 	val directories = mutableMapOf<String, Directory>()
 	override fun toString(): String {
 		return "Directory(files=$files, directories=$directories)"
+	}
+
+	fun du(): Long {
+		return files.values.sum() + directories.values.sumOf { it.du() }
 	}
 
 	fun sumSmall(thresholdSize: Long): Pair<Long, Long> {
@@ -23,6 +28,18 @@ class Directory(val parent: Directory?) {
 			size
 		)
 	}
+
+	fun findSmallest(minDelete: Long): Pair<Long, Long> {
+		val childSizes =
+			directories.values.map { it.findSmallest(minDelete) }.fold(Pair(Long.MAX_VALUE, 0L)) { p1, p2 ->
+				Pair(min(p1.first, p2.first), p1.second + p2.second)
+			}
+		val size = childSizes.second + files.values.sum()
+		return Pair(
+			if (size in minDelete..childSizes.first) size else childSizes.first,
+			size
+		)
+	}
 }
 
 enum class Command {
@@ -35,6 +52,7 @@ enum class Mode {
 	LIST
 }
 
+const val DISK_SIZE = 70_000_000L
 const val COMMAND_INDICATOR = "$"
 const val DIR_INDICATOR = "dir"
 const val LS = "ls"
@@ -88,6 +106,10 @@ fun parse(input: List<String>): Directory {
 	return root
 }
 
+fun findMinDelete(directory: Directory, requiredSpace: Long): Long {
+	return directory.findSmallest(requiredSpace - (DISK_SIZE - directory.du())).first
+}
+
 fun main() {
-	println(parse(readInput("aoc2022/7")).sumSmall(100_000L).first)
+	println(findMinDelete(parse(readInput("aoc2022/7")), 30_000_000L))
 }

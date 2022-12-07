@@ -17,4 +17,9 @@ class D07_DuTest {
 	fun sumSmall() {
 		assertEquals(95437L, parse(lines).sumSmall(100_000L).first)
 	}
+
+	@Test
+	fun findSmallest() {
+		assertEquals(24933642L, findMinDelete(parse(lines), 30_000_000L))
+	}
 }
