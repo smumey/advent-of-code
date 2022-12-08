@@ -47,9 +47,9 @@ data class TreePatch(val trees: List<Int>, val width: Int) {
 	fun scenicScore(coord: Coordinate): Int {
 		return Direction.values()
 			.map { direction ->
-				val list = interveningTrees(coord, direction).toList()
+				val trees = interveningTrees(coord, direction)
 				var count = 0
-				for (tree in list) {
+				for (tree in trees) {
 					count += 1
 					if (height(tree) >= height(coord)) {
 						break
