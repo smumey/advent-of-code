@@ -1,8 +1,8 @@
 package aoc2022.d05
 
+import aoc.readTestInput
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
-import readTestInput
 
 class D05_StacksKtTest {
 	private val input = parse(readTestInput("aoc2022/5"))

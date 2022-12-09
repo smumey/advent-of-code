@@ -1,6 +1,6 @@
 package aoc2022.d06
 
-import readInput
+import aoc.readInput
 
 fun findStartOfPacketMarker(message: String): Int? {
 	return (4..message.length).find { message.substring(it - 4, it).toSet().size == 4 }

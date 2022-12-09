@@ -1,7 +1,7 @@
 package aoc2022.d07
 
+import aoc.readInput
 import kotlin.math.min
-import readInput
 
 class Directory(val parent: Directory?) {
 	val files = mutableMapOf<String, Long>()

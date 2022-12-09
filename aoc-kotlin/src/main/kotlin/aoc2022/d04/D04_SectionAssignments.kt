@@ -1,6 +1,6 @@
 package aoc2022.d04
 
-import readInput
+import aoc.readInput
 
 fun contains(container: IntRange, containee: IntRange): Boolean {
 	return container.first <= containee.first && containee.last <= container.last

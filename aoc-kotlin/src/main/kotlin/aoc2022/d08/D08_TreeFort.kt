@@ -1,6 +1,6 @@
 package aoc2022.d08
 
-import readInput
+import aoc.readInput
 
 enum class Direction {
 	UP,

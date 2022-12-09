@@ -1,8 +1,8 @@
 package aoc2022.d08
 
+import aoc.readTestInput
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import readTestInput
 
 class D08_TreeFortTest {
 	val trees = parse(readTestInput("aoc2022/8"))

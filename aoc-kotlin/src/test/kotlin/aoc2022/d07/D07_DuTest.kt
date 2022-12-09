@@ -1,8 +1,8 @@
 package aoc2022.d07
 
+import aoc.readTestInput
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
-import readTestInput
 
 class D07_DuTest {
 	val lines = readTestInput("aoc2022/7")

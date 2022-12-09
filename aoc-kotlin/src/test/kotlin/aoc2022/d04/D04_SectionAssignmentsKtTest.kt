@@ -1,8 +1,8 @@
 package aoc2022.d04
 
-import org.junit.jupiter.api.Test
-import readTestInput
+import aoc.readTestInput
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Test
 
 class D04_SectionAssignmentsKtTest {
 	private val assignmentPairs = readTestInput("aoc2022/4").map { parse(it) }

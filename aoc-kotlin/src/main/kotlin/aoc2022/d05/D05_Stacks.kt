@@ -1,7 +1,7 @@
 package aoc2022.d05
 
+import aoc.readInput
 import java.util.Scanner
-import readInput
 
 fun parse(input: List<String>): Pair<StackState, List<Move>> {
 	return Pair(
