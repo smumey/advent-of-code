@@ -13,13 +13,8 @@ fun signum(x: Int) = when {
 fun follow(head: Coordinate, tail: Coordinate): Coordinate {
 	val deltaX = head.x - tail.x
 	val deltaY = head.y - tail.y
-	val newTail = when {
-		abs(deltaX) <= 1 && abs(deltaY) <= 1 -> tail
-		abs(deltaY) == 0 -> Coordinate(tail.x + deltaX / 2, tail.y)
-		abs(deltaX) == 0 -> Coordinate(tail.x, tail.y + deltaY / 2)
-		else -> Coordinate(tail.x + signum(deltaX), tail.y + signum(deltaY))
-	}
-	return newTail
+	return if (abs(deltaX) <= 1 && abs(deltaY) <= 1) tail
+	else Coordinate(tail.x + signum(deltaX), tail.y + signum(deltaY))
 }
 
 data class MoveSteps(val direction: Direction, val steps: Int)
