@@ -36,19 +36,21 @@ fun parse(line: String): MoveSteps {
 	return MoveSteps(direction, scanner.nextInt())
 }
 
-fun countTailPositions(moveSteps: List<MoveSteps>): Int {
+fun countTailPositions(moveSteps: List<MoveSteps>, tailLength: Int = 1): Int {
 	val initialCoord = Coordinate(0, 0)
 	val headPositions = moveSteps.fold(listOf(initialCoord)) { coords, moveStep ->
 		(0 until moveStep.steps).fold(coords) { stepCoords, _ ->
 			stepCoords + stepCoords.last().move(moveStep.direction)
 		}
 	}
-	val tailPositions = headPositions.drop(1).fold(listOf(initialCoord)) { tailCoords, headCoord ->
-		tailCoords + follow(headCoord, tailCoords.last())
+	val tailPositions = (0 until tailLength).fold(headPositions) { parentCoords, _ ->
+		parentCoords.fold(listOf(initialCoord)) { childCoords, parentCoord ->
+			childCoords + follow(parentCoord, childCoords.last())
+		}
 	}
 	return tailPositions.toSet().size
 }
 
 fun main() {
-	println(countTailPositions(readInput("aoc2022/9").map(::parse)))
+	println(countTailPositions(readInput("aoc2022/9").map(::parse), 9))
 }
