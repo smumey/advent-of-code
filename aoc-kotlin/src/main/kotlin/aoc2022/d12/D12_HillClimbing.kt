@@ -26,7 +26,15 @@ data class TopoMap(val rows: List<String>) {
 		return coordinate.y in rows.indices && coordinate.x in 0 until width()
 	}
 
-	fun neighbours(coordinate: Coordinate): List<Coordinate> {
+	fun downNeighbours(coordinate: Coordinate): List<Coordinate> {
+		val neigbours = Direction.values()
+			.map { coordinate.move(it) }
+			.filter { inbounds(it) }
+			.filter { height(coordinate) - height(it) <= 1 }
+		return neigbours
+	}
+
+	fun upNeighbours(coordinate: Coordinate): List<Coordinate> {
 		val neigbours = Direction.values()
 			.map { coordinate.move(it) }
 			.filter { inbounds(it) }
@@ -45,6 +53,28 @@ data class TopoMap(val rows: List<String>) {
 	}
 
 	fun findShortestPath(start: Coordinate, end: Coordinate): List<Coordinate> {
+		val prev = findPrevious(start, ::upNeighbours)
+		return generateSequence(end) { prev[it] }.toList().dropLast(1).reversed()
+	}
+
+	fun findLowPaths(end: Coordinate): List<List<Coordinate>> {
+		val prev = findPrevious(end, ::downNeighbours)
+		val lowSpots = rows.indices.flatMap { y ->
+			rows[y].indices.map { x -> Coordinate(x, y) }
+		}.filter { height(it) == 'a' }
+		return lowSpots.map { low ->
+			generateSequence(low) { prev[it] }.toList().dropLast(1)
+		}.filterNot { it.isEmpty() }
+	}
+
+	fun findShortestLowPath(end: Coordinate): Int? {
+		return findLowPaths(end).minOfOrNull { it.size }
+	}
+
+	private fun findPrevious(
+		start: Coordinate,
+		neighbourFun: (Coordinate) -> List<Coordinate>
+	): MutableMap<Coordinate, Coordinate> {
 		val dist = mutableMapOf<Coordinate, Int>()
 		val prev = mutableMapOf<Coordinate, Coordinate>()
 		val queue = rows.indices.flatMap { y ->
@@ -56,7 +86,7 @@ data class TopoMap(val rows: List<String>) {
 		while (queue.isNotEmpty()) {
 			queue.sortByDescending { getDistance(it) }
 			val coord = queue.removeLast()
-			neighbours(coord).filter { queue.contains(it) }.forEach { it ->
+			neighbourFun(coord).filter { queue.contains(it) }.forEach { it ->
 				val alt = infinityAdd(getDistance(coord), 1)
 				if (alt < getDistance(it)) {
 					dist[it] = alt
@@ -64,7 +94,7 @@ data class TopoMap(val rows: List<String>) {
 				}
 			}
 		}
-		return generateSequence(end) { prev[it] }.toList().dropLast(1).reversed()
+		return prev
 	}
 
 }
@@ -75,9 +105,8 @@ fun parse(lines: List<String>): TopoMap {
 
 fun main() {
 	val topoMap = parse(readInput("aoc2022/12"))
-	val start = topoMap.find('S')
 	val end = topoMap.find('E')
-	if (start != null && end != null) {
-		println(topoMap.findShortestPath(start, end).size)
+	if (end != null) {
+		println(topoMap.findShortestLowPath(end))
 	}
 }

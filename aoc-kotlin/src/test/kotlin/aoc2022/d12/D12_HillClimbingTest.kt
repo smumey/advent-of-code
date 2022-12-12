@@ -15,4 +15,12 @@ class D12_HillClimbingTest {
 			assertEquals(31, topoMap.findShortestPath(start, end).size)
 		}
 	}
+
+	@Test
+	fun findShortestLowPath() {
+		val end = topoMap.find('E')
+		if (end != null) {
+			assertEquals(29, topoMap.findShortestLowPath(end))
+		}
+	}
 }
