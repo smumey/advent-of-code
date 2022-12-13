@@ -6,7 +6,8 @@ import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 
 class D13_Distress_SignalTest {
-	val packetPairs = toPacketPairs(readTestInput("aoc2022/13").mapNotNull(::parse))
+	val packets = readTestInput("aoc2022/13").mapNotNull(::parse)
+	val packetPairs = toPacketPairs(packets)
 
 	@Test
 	fun compare0() {
@@ -31,5 +32,10 @@ class D13_Distress_SignalTest {
 	@Test
 	fun sumCorrectOrderIndices() {
 		assertEquals(13, sumCorrectOrderIndices(packetPairs))
+	}
+
+	@Test
+	fun orderAndMultiplyDividerPacketIndexes() {
+		assertEquals(140, orderAndMultiplyDividerPacketIndexes(packets))
 	}
 }

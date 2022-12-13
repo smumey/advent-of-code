@@ -67,6 +67,15 @@ fun sumCorrectOrderIndices(packetPairs: List<List<Packet>>): Int {
 	return packetPairs.mapIndexed { i, pair -> if (pair[0] < pair[1]) i + 1 else 0 }.sum()
 }
 
-fun main() {
-	println(sumCorrectOrderIndices(toPacketPairs(readInput("aoc2022/13").mapNotNull(::parse))))
+val dividerPacket1 = Packet(listOf(listOf(2)))
+val dividerPacket2 = Packet(listOf(listOf(6)))
+
+fun orderAndMultiplyDividerPacketIndexes(packets: List<Packet>): Int {
+	val sorted = ((packets + dividerPacket1) + dividerPacket2).sorted()
+	return (sorted.indexOf(dividerPacket1) + 1) * (sorted.indexOf(dividerPacket2) + 1)
 }
+
+fun main() {
+	println(orderAndMultiplyDividerPacketIndexes(readInput("aoc2022/13").mapNotNull(::parse)))
+}
+
