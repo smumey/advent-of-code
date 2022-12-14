@@ -39,7 +39,7 @@ data class SandState(
 	val sandCoordinate: Coordinate,
 	val sandRestCount: Int
 ) {
-	fun step(): SandState? {
+	fun stepVoid(): SandState? {
 		if (sandCoordinate.y >= maxDepth) return null
 		val nextSandCoordinate =
 			listOf(listOf(Direction.UP), listOf(Direction.UP, Direction.LEFT), listOf(Direction.UP, Direction.RIGHT))
@@ -51,14 +51,23 @@ data class SandState(
 			SandState(maxDepth, filled, nextSandCoordinate, sandRestCount)
 		}
 	}
-}
 
-fun simulateSand(sandState: SandState): Sequence<SandState> {
-	return generateSequence(sandState) { it.step() }
+	fun stepInfiniteFloor(): SandState? {
+		if (filled.contains(sandSource)) return null
+		val nextSandCoordinate =
+			listOf(listOf(Direction.UP), listOf(Direction.UP, Direction.LEFT), listOf(Direction.UP, Direction.RIGHT))
+				.map { it.fold(sandCoordinate) { sand, dir -> sand.move(dir) } }
+				.find { !(filled.contains(it)) && it.y < maxDepth + 2 }
+		return if (nextSandCoordinate == null) {
+			SandState(maxDepth, filled + sandCoordinate, sandSource, sandRestCount + 1)
+		} else {
+			SandState(maxDepth, filled, nextSandCoordinate, sandRestCount)
+		}
+	}
 }
 
 fun main() {
 	val rockCoordinates = readInput("aoc2022/14").map(::parse).flatMap(::filled).toSet()
 	val initialState = SandState(maxDepth(rockCoordinates), rockCoordinates, sandSource, 0)
-	println(simulateSand(initialState).last().sandRestCount)
+	println(generateSequence(initialState) { it.stepInfiniteFloor() }.last().sandRestCount)
 }
