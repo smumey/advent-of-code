@@ -11,6 +11,17 @@ data class Coordinate(val x: Int, val y: Int) {
 	}
 }
 
+data class LongCoordinate(val x: Long, val y: Long) {
+	fun move(direction: Direction): LongCoordinate {
+		return when (direction) {
+			Direction.UP -> LongCoordinate(x, y + 1L)
+			Direction.RIGHT -> LongCoordinate(x + 1L, y)
+			Direction.DOWN -> LongCoordinate(x, y - 1L)
+			Direction.LEFT -> LongCoordinate(x - 1L, y)
+		}
+	}
+}
+
 enum class Direction {
 	UP, RIGHT, DOWN, LEFT
 }
