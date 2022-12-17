@@ -42,15 +42,16 @@ fun findLowestDistancePoint(points: Set<Point>, distances: List<IntArray>): Poin
 
 fun findRoute(grid: List<List<Int>>): Pair<List<Point>, Int> {
 	val yRange = 0 until grid.size * 5
-	val xRange = 0 until grid[0].size * 5
+	val xLimit = grid[0].size * 5
+	val xRange = 0 until xLimit
 	val destination = Point(xRange.last, yRange.last)
-	val distances = yRange.map { xRange.map { Int.MAX_VALUE }.toIntArray() }.toList()
+	val distances = yRange.map { IntArray(xLimit) { Int.MAX_VALUE } }
 	distances[0][0] = 0
-	val previous: List<MutableList<Point?>> = yRange.map { xRange.map { null as Point? }.toMutableList() }.toList()
+	val previous: List<MutableList<Point?>> = yRange.map { MutableList<Point?>(xLimit) { null } }
 	val settled = mutableSetOf<Point>()
 	val unsettled = mutableSetOf(Point(0, 0))
 	while (unsettled.isNotEmpty()) {
-		val p = findLowestDistancePoint(unsettled, distances) ?: throw(IllegalStateException())
+		val p = findLowestDistancePoint(unsettled, distances) ?: throw (IllegalStateException())
 		unsettled.remove(p)
 		neighbours(p, destination)
 			.filter { !settled.contains(it) }
@@ -65,7 +66,7 @@ fun findRoute(grid: List<List<Int>>): Pair<List<Point>, Int> {
 		settled.add(p)
 	}
 	return Pair(
-		(generateSequence(destination ?: Point(0, 0)) { (previous[it.y][it.x]) }).toList().reversed(),
+		(generateSequence(destination) { (previous[it.y][it.x]) }).toList().reversed(),
 		distances.last().last()
 	)
 }

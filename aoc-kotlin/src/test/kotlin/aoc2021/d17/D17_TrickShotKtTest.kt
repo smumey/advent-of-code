@@ -1,6 +1,7 @@
 package aoc2021.d17
 
 import kotlin.test.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class D17_TrickShotKtTest {
@@ -117,7 +118,7 @@ internal class D17_TrickShotKtTest {
 		Pair(27, -8),
 		Pair(30, -5),
 		Pair(24, -7)
-	);
+	)
 
 	@Test
 	fun testParseTarget() {
@@ -169,6 +170,7 @@ internal class D17_TrickShotKtTest {
 	}
 
 	@Test
+	@Disabled
 	fun testVelCountTarget() {
 		val target = parseTarget("target area: x=20..30, y=-10..-5")
 		val trajectories = findDistinctTrajectoriesOverTarget(target)
