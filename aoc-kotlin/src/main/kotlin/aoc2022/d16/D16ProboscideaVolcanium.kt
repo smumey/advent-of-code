@@ -1,5 +1,7 @@
 package aoc2022.d16
 
+import kotlin.math.max
+
 data class Valve(val label: String, val rate: Int, val tunnels: Set<String>)
 
 fun parse(line: String): Valve {
@@ -72,67 +74,50 @@ fun findDistances(valves: List<Valve>): (Valve, Valve) -> Int {
 	}
 }
 
-private const val TIME_LIMIT = 30
-
-fun findMaxPressure(
-	location: Valve,
-	unvisited: List<Valve>,
-	time: Int,
-	pressure: Int,
-	distance: (Valve, Valve) -> Int
-): Int {
-	val possible = unvisited.filter {
-		distance(it, location) + time < TIME_LIMIT
-	}
-	return possible.maxOfOrNull {
-		val releaseTime = time + distance(it, location) + 1
-		val addedPressure = (TIME_LIMIT - releaseTime) * it.rate
-		findMaxPressure(it, possible.minus(it), releaseTime, pressure + addedPressure, distance)
-	} ?: pressure
-}
-
-data class Agent(val valve: Valve, val time: Int)
-
-fun findMaxPressureWithElephant(
-	agents: List<Agent>,
-	unvisited: List<Valve>,
+fun visit(
+	valve: Valve,
+	unstuck: List<Valve>,
+	openValves: Set<Valve>,
+	timeRemaining: Int,
 	pressure: Int,
 	distance: (Valve, Valve) -> Int,
-	timeLimit: Int
-): Int {
-	return unvisited.maxOfOrNull { valve ->
-		agents.maxOf { agent ->
-			val releaseTime = agent.time + distance(agent.valve, valve) + 1
-			if (releaseTime >= timeLimit) {
-				pressure
-			} else {
-				val addedPressure = (timeLimit - releaseTime) * valve.rate
-				findMaxPressureWithElephant(
-					agents.map { if (it === agent) Agent(valve, releaseTime) else it },
-					unvisited.minus(valve),
-					pressure + addedPressure,
-					distance,
-					timeLimit
-				)
-			}
+	statePressure: MutableMap<Set<Valve>, Int>
+): Map<Set<Valve>, Int> {
+	statePressure[openValves] = max(statePressure.getOrDefault(openValves, 0), pressure)
+	unstuck.forEach { v ->
+		val newTimeRemaining = timeRemaining - distance(valve, v) - 1
+		if (!(openValves.contains(v) || newTimeRemaining <= 0)) {
+			visit(
+				v,
+				unstuck,
+				openValves + v,
+				newTimeRemaining,
+				pressure + newTimeRemaining * v.rate,
+				distance,
+				statePressure
+			)
 		}
-	} ?: pressure
+	}
+	return statePressure
 }
 
 fun findMaxPressure(valves: List<Valve>, startLabel: String): Int? {
 	return valves.find { it.label == startLabel }?.let { start ->
-		findMaxPressure(start, valves.filter { it.rate > 0 }, 0, 0, findDistances(valves))
+		val statePressure =
+			visit(start, valves.filter { it.rate > 0 }, setOf(), 30, 0, findDistances(valves), mutableMapOf())
+		return statePressure.values.maxOrNull()
 	}
 }
 
 fun findMaxPressureWithElephant(valves: List<Valve>, startLabel: String, timeLimit: Int): Int? {
 	return valves.find { it.label == startLabel }?.let { start ->
-		findMaxPressureWithElephant(
-			listOf(Agent(start, 0), Agent(start, 0)),
-			valves.filter { it.rate > 0 },
-			0,
-			findDistances(valves),
-			timeLimit
-		)
+		val statePressure =
+			visit(start, valves.filter { it.rate > 0 }, setOf(), timeLimit, 0, findDistances(valves), mutableMapOf())
+		return statePressure.entries.fold(0) { p1, e1 ->
+			statePressure.entries.fold(p1) { p2, e2 ->
+				if (e1.key.intersect(e2.key).isNotEmpty()) p2
+				else max(p2, e1.value + e2.value)
+			}
+		}
 	}
 }

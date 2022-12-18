@@ -40,6 +40,6 @@ class D16ProboscideaVolcaniumTest {
 
 	@Test
 	fun findMaxPressureWithElephants() {
-		assertEquals(0, findMaxPressureWithElephant(valves, "AA", 26))
+		assertEquals(2591, findMaxPressureWithElephant(valves, "AA", 26))
 	}
 }
