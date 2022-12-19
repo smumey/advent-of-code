@@ -25,3 +25,21 @@ data class LongCoordinate(val x: Long, val y: Long) {
 enum class Direction {
 	UP, RIGHT, DOWN, LEFT
 }
+
+data class Coordinate3D(val x: Int, val y: Int, val z: Int) {
+	fun move(direction: Direction3D): Coordinate3D {
+		return when (direction) {
+			Direction3D.UP -> Coordinate3D(x, y + 1, z)
+			Direction3D.RIGHT -> Coordinate3D(x + 1, y, z)
+			Direction3D.DOWN -> Coordinate3D(x, y - 1, z)
+			Direction3D.LEFT -> Coordinate3D(x - 1, y, z)
+			Direction3D.IN -> Coordinate3D(x, y, z - 1)
+			Direction3D.OUT -> Coordinate3D(x, y, z + 1)
+		}
+	}
+
+}
+
+enum class Direction3D {
+	UP, RIGHT, DOWN, LEFT, IN, OUT
+}

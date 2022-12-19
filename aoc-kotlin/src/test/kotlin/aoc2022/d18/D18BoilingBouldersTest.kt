@@ -18,4 +18,14 @@ class D18BoilingBouldersTest {
 	fun surfaceArea() {
 		assertEquals(3856, surfaceArea(cubes))
 	}
+
+	@Test
+	fun testExteriorSurfaceArea() {
+		assertEquals(58, exteriorSurfaceArea(testCubes))
+	}
+
+	@Test
+	fun exteriorSurfaceArea() {
+		assertEquals(0, exteriorSurfaceArea(cubes))
+	}
 }
