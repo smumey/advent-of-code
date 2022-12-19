@@ -117,6 +117,7 @@ class Cave(val winds: List<Direction>) {
 	val floors = mutableListOf<MutableList<Boolean>>()
 	var windIndex = 0
 	var rockIndex = 0
+	var rockCount = 0
 
 	fun nextWind(): Direction {
 		val w = winds[windIndex]
@@ -162,10 +163,11 @@ class Cave(val winds: List<Direction>) {
 			val downRock = rock.move(Direction.DOWN)
 			if (inbounds(downRock)) rock = downRock
 			else {
-				updateFloor(rock)
 				break
 			}
 		}
+		updateFloor(rock)
+		rockCount++
 	}
 
 	private fun updateFloor(rock: Rock) {
@@ -180,6 +182,10 @@ class Cave(val winds: List<Direction>) {
 			}
 		}
 	}
+
+	fun marker(): StateMarker {
+		return StateMarker(windIndex, rockIndex, floors.takeLast(winds.size))
+	}
 }
 
 fun getHeight(rockCount: Int, winds: List<Direction>): Int {
@@ -188,4 +194,33 @@ fun getHeight(rockCount: Int, winds: List<Direction>): Int {
 		cave.processRock()
 	}
 	return cave.floors.size
+}
+
+data class StateMarker(val windIndex: Int, val rockIndex: Int, val layers: List<List<Boolean>>)
+
+fun getHeightLarge(rockCount: Long, winds: List<Direction>): Long {
+	val cave = Cave(winds)
+	repeat(100 * winds.size) {
+		cave.processRock()
+	}
+	val stateMarker = cave.marker()
+	val count = cave.rockCount
+	val height = cave.floors.size
+	var repeatMarker: StateMarker
+	do {
+		cave.processRock()
+		if (cave.rockCount % 1000 == 0) {
+			println("still looking for repeat after ${cave.rockCount}")
+		}
+	} while (cave.marker() != stateMarker)
+	val repeatHeight = cave.floors.size
+	val repeatCount = cave.rockCount
+	val cycleSize = repeatCount - count
+	val remainingRocks = rockCount - cave.rockCount
+	val cycles = remainingRocks / cycleSize
+	val remainder = remainingRocks % cycleSize
+	repeat(remainder.toInt()) {
+		cave.processRock()
+	}
+	return (repeatHeight - height) * cycles + cave.floors.size
 }

@@ -66,4 +66,14 @@ class D17PyroclasticFlowTest {
 	fun getHeight() {
 		assertEquals(3114, getHeight(2022, winds))
 	}
+
+	@Test
+	fun testGetHeightLarge() {
+		assertEquals(1514285714288L, getHeightLarge(1000000000000L, testWinds))
+	}
+
+	@Test
+	fun getHeightLarge() {
+		assertEquals(1540804597682L, getHeightLarge(1000000000000L, winds))
+	}
 }
