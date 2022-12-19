@@ -26,12 +26,15 @@ fun parse(line: String): Cube {
 
 fun surfaceArea(cubes: List<Cube>): Int {
 	var faces = cubes.map { it.faces }
-		.fold(List<Set<Coordinate3D>>(3) { setOf() }) { list, cubeFacesList ->
-			list.mapIndexed { i, l -> l + cubeFacesList[i] }
+		.fold(List<Map<Coordinate3D, Int>>(3) { mapOf() }) { list, cubeFacesList ->
+			list.mapIndexed { i, l ->
+				val cubeFaces = cubeFacesList[i]
+				val map = l.toMutableMap()
+				cubeFaces.forEach {
+					map.merge(it, 1, Int::plus)
+				}
+				map
+			}
 		}
-	println("faces $faces")
-	var unionCounts = faces.map { it.count() }
-	println(unionCounts)
-	var distinctCounts = 2 * cubes.size
-	return cubes.size * 6 - 2 * unionCounts.sumOf { distinctCounts - it }
+	return faces.sumOf { it.filterValues { count -> count == 1 }.count() }
 }
