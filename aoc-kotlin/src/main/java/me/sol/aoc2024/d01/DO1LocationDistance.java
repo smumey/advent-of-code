@@ -3,7 +3,6 @@ package me.sol.aoc2024.d01;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
@@ -50,12 +49,11 @@ public class DO1LocationDistance {
             l1.sort(Integer::compareTo);
             l2.sort(Integer::compareTo);
             int s = 0;
-            var found = new HashMap<Integer, Integer>();
-            for (int i = 0, j = 0; i < l1.size(); i++) {
+            for (int i = 0, j = 0, lastLoc = Integer.MIN_VALUE, lastSim = 0; i < l1.size(); i++) {
                 int loc = l1.get(i);
                 var sim = 0;
-                if (found.containsKey(loc)) {
-                    sim = found.get(loc);
+                if (loc == lastLoc) {
+                    sim = lastSim;
                 } else {
                     for (; j < l2.size() && l2.get(j) < loc; j++) {
                     }
@@ -64,9 +62,10 @@ public class DO1LocationDistance {
                         count += 1;
                     }
                     sim = loc * count;
-                    found.put(loc, sim);
                 }
                 s += sim;
+                lastLoc = loc;
+                lastSim = sim;
             }
             return s;
         }
