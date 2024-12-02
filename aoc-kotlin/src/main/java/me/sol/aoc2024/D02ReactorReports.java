@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.function.IntUnaryOperator;
 
 public class D02ReactorReports {
     private final Report[] reports;
@@ -19,7 +20,7 @@ public class D02ReactorReports {
 
     public static void main(String[] args) throws IOException {
         try (var reader = new BufferedReader(new InputStreamReader(DO1LocationDistance.class.getResourceAsStream("/input/aoc2024/d02-input")))) {
-            System.out.println(new D02ReactorReports(parse(reader)).countSafe());
+            System.out.println(new D02ReactorReports(parse(reader)).countSafeDampened());
         }
     }
 
@@ -34,19 +35,30 @@ public class D02ReactorReports {
         return Arrays.stream(reports).filter(Report::isSafe).count();
     }
 
+    long countSafeDampened() {
+        return Arrays.stream(reports).filter(Report::isSafeDampened).count();
+    }
+
     record Report(long[] readings) {
         boolean isSafe() {
-            if (readings.length < 2) {
+            return isSafe(-1);
+        }
+
+        boolean isSafe(int skip) {
+            if (readings.length < 2 || skip >= 0 && readings.length < 3) {
                 return true;
             }
-            long r1 = readings[0];
-            long r2 = readings[1];
-            var sign = r2 > r1 ? 1L : -1L;
-            if (!checkPair(r1, r2, sign)) {
+            var nextIndex = (IntUnaryOperator) i -> i == skip ? i + 2 : i + 1;
+            var i0 = nextIndex.applyAsInt(-1);
+            var i1 = nextIndex.applyAsInt(i0);
+            long r0 = readings[i0];
+            long r1 = readings[i1];
+            var sign = r1 > r0 ? 1L : -1L;
+            if (!checkPair(r0, r1, sign)) {
                 return false;
             }
-            long previous = r2;
-            for (int i = 2; i < readings.length; i++) {
+            long previous = r1;
+            for (int i = nextIndex.applyAsInt(i1); i < readings.length; i = nextIndex.applyAsInt(i)) {
                 if (!checkPair(previous, readings[i], sign)) {
                     return false;
                 }
@@ -54,5 +66,18 @@ public class D02ReactorReports {
             }
             return true;
         }
+
+        boolean isSafeDampened() {
+            if (isSafe()) {
+                return true;
+            }
+            for (int i = 0; i < readings.length; i++) {
+                if (isSafe(i)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
+
 }
