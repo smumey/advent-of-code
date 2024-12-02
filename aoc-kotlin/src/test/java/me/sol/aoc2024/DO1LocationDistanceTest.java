@@ -1,4 +1,4 @@
-package me.sol.aoc2024.d01;
+package me.sol.aoc2024;
 
 import org.junit.jupiter.api.Test;
 
