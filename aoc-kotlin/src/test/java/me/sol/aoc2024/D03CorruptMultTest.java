@@ -11,6 +11,6 @@ class D03CorruptMultTest {
 
     @Test
     void sumProducts() throws IOException {
-        assertThat(new D03CorruptMult(Utility.readSample(getClass(), D03CorruptMult::parse)).sumProducts()).isEqualTo(161);
+        assertThat(new D03CorruptMult(Utility.readSample(getClass(), D03CorruptMult::parse)).sumProducts()).isEqualTo(48);
     }
 }

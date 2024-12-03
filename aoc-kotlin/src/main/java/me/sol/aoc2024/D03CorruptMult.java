@@ -3,102 +3,59 @@ package me.sol.aoc2024;
 import me.sol.Utility;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.function.IntFunction;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class D03CorruptMult {
 
-    private final List<String> lines;
+    private final String input;
 
-    D03CorruptMult(List<String> lines) {
-        this.lines = lines;
+    D03CorruptMult(String input) {
+        this.input = input;
     }
 
     public static void main(String[] args) throws IOException {
         System.out.println(new D03CorruptMult(Utility.readInput(D03CorruptMult.class, D03CorruptMult::parse)).sumProducts());
     }
 
-    static List<String> parse(Stream<String> lines) {
-        return lines.toList();
+    static String parse(Stream<String> lines) {
+        return lines.collect(Collectors.joining(System.lineSeparator()));
     }
 
     long sumProducts() {
-
-        return lines.stream()
-                .map(l -> l.chars()
-                        .peek(c -> System.out.printf("char=%c%n", c))
-                        .boxed()
-                        .reduce(
-                                ProductState.INITIAL_STATE,
-                                ProductState::apply,
-                                (s1, s2) -> {
-                                    throw new IllegalStateException();
-                                }
-                        )
-                )
-                .mapToLong(ProductState::sum)
-                .sum();
+        return ParseState.sumProducts(input);
     }
 
-    enum ParseStep {
-        OPEN, M, U, L, M1_BEGIN, M1_DIGITS, M2_BEGIN, M2_DIGITS, M2_END
-    }
+    record ParseState(boolean active, String remaining, long prodSum) {
+        static final String ON = "do()";
+        static final String OFF = "don't()";
+        static final Pattern PROD_PATTERN = Pattern.compile("^mul\\((\\d{1,3}),(\\d{1,3})\\)");
 
-    record ParseState(ParseStep step, String digits1, String digits2) {
-        public static final ParseState OPEN_STATE = new ParseState(ParseStep.OPEN, "", "");
-        public static final ParseState M_STATE = new ParseState(ParseStep.M, "", "");
-        public static final ParseState U_STATE = new ParseState(ParseStep.U, "", "");
-        public static final ParseState L_STATE = new ParseState(ParseStep.L, "", "");
-        public static final ParseState M1_BEGIN_STATE = new ParseState(ParseStep.M1_BEGIN, "", "");
-
-        ParseState transition(int c) {
-            if (c == 'm') {
-                return M_STATE;
-            }
-            return switch (this.step()) {
-                case ParseStep.OPEN, M2_END -> OPEN_STATE;
-                case M -> c == 'u' ? U_STATE : OPEN_STATE;
-                case U -> c == 'l' ? L_STATE : OPEN_STATE;
-                case L -> c == '(' ? M1_BEGIN_STATE : OPEN_STATE;
-                case M1_BEGIN ->
-                        Character.isDigit(c) ? new ParseState(ParseStep.M1_DIGITS, String.valueOf((char) c), "") : OPEN_STATE;
-                case M1_DIGITS -> {
-                    if (Character.isDigit(c) && digits1().length() < 3) {
-                        yield new ParseState(ParseStep.M1_DIGITS, digits1 + (char) c, "");
-                    } else {
-                        yield c == ',' ? new ParseState(ParseStep.M2_BEGIN, digits1, digits2) : OPEN_STATE;
-                    }
-                }
-                case M2_BEGIN ->
-                        Character.isDigit(c) ? new ParseState(ParseStep.M2_DIGITS, digits1, String.valueOf((char) c)) : OPEN_STATE;
-                case M2_DIGITS -> {
-                    if (Character.isDigit(c) && digits2().length() < 3) {
-                        yield new ParseState(ParseStep.M2_DIGITS, digits1, digits2 + (char) c);
-                    } else {
-                        yield c == ')' ? new ParseState(ParseStep.M2_END, digits1, digits2) : OPEN_STATE;
-                    }
-                }
-            };
+        static long sumProducts(String s) {
+            return Stream.iterate(new ParseState(true, s, 0L), ParseState::hasNext, ParseState::transition)
+                    .reduce((s1, s2) -> s2)
+                    .map(ParseState::prodSum)
+                    .orElse(0L);
         }
 
-        long product() {
-            return Long.parseLong(digits1) * Long.parseLong(digits2);
-        }
-    }
-
-    record ProductState(long sum, ParseState parseState) implements IntFunction<ProductState> {
-        static final ProductState INITIAL_STATE = new ProductState(0L, ParseState.OPEN_STATE);
-
-        @Override
-        public ProductState apply(int c) {
-            var newParseState = parseState.transition(c);
-            System.out.printf("state=%s c=%c newParseState=%s%n", this, c, newParseState);
-            if (newParseState.step == ParseStep.M2_END) {
-                return new ProductState(sum + newParseState.product(), newParseState);
+        ParseState transition() {
+            if (remaining.startsWith(ON)) {
+                return new ParseState(true, remaining.substring(ON.length()), prodSum);
+            } else if (remaining.startsWith(OFF)) {
+                return new ParseState(false, remaining.substring(OFF.length()), prodSum);
             } else {
-                return new ProductState(sum, newParseState);
+                var matcher = PROD_PATTERN.matcher(remaining);
+                if (matcher.find()) {
+                    long product = active ? Long.parseLong(matcher.group(1)) * Long.parseLong(matcher.group(2)) : 0L;
+                    return new ParseState(active, remaining.substring(matcher.end()), prodSum + product);
+                }
+                return new ParseState(active, remaining.substring(1), prodSum);
             }
+        }
+
+        boolean hasNext() {
+            return !remaining.isEmpty();
         }
     }
 }
