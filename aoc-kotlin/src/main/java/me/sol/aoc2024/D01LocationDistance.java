@@ -1,28 +1,28 @@
 package me.sol.aoc2024;
 
+import me.sol.Utility;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
-public class DO1LocationDistance {
-    static Locations parse(InputStream reader) {
+public class D01LocationDistance {
+    static Locations parse(Stream<String> lines) {
         var list1 = new ArrayList<Integer>();
         var list2 = new ArrayList<Integer>();
-        try (var scanner = new Scanner(reader)) {
-            while (scanner.hasNextInt()) {
-                list1.add(scanner.nextInt());
-                list2.add(scanner.nextInt());
-            }
-        }
+        lines.map(l -> new Scanner(l)).forEach(s -> {
+            list1.add(s.nextInt());
+            list2.add(s.nextInt());
+        });
         return new Locations(list1, list2);
     }
 
     public static void main(String[] args) throws IOException {
-        try (var reader = DO1LocationDistance.class.getResourceAsStream("/input/aoc2024/d01-input")) {
-            System.out.println(parse(reader).similarity());
-        }
+        System.out.println(
+                Utility.readInput(D01LocationDistance.class, D01LocationDistance::parse).similarity()
+        );
     }
 
     record Locations(List<Integer> list1, List<Integer> list2) {

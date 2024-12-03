@@ -1,5 +1,6 @@
 package me.sol.aoc2024;
 
+import me.sol.Utility;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -11,15 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class D02ReactorReportsTest {
     @Test
     void countSafe() throws IOException {
-        try (var reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/input/aoc2024/d02-sample")))) {
-            assertThat(new D02ReactorReports(D02ReactorReports.parse(reader)).countSafe()).isEqualTo(2L);
-        }
+        assertThat(new D02ReactorReports(Utility.readSample(getClass(), D02ReactorReports::parse)).countSafe()).isEqualTo(2L);
     }
 
     @Test
     void countSafeDampened() throws IOException {
-        try (var reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/input/aoc2024/d02-sample")))) {
-            assertThat(new D02ReactorReports(D02ReactorReports.parse(reader)).countSafeDampened()).isEqualTo(4L);
-        }
+        var reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/input/aoc2024/d02-sample")));
+        assertThat(new D02ReactorReports(Utility.readSample(getClass(), D02ReactorReports::parse)).countSafeDampened()).isEqualTo(4L);
     }
 }

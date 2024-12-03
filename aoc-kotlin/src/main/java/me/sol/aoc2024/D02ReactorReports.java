@@ -1,10 +1,11 @@
 package me.sol.aoc2024;
 
-import java.io.BufferedReader;
+import me.sol.Utility;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
+import java.util.stream.Stream;
 
 public class D02ReactorReports {
     private final Report[] reports;
@@ -19,13 +20,11 @@ public class D02ReactorReports {
     }
 
     public static void main(String[] args) throws IOException {
-        try (var reader = new BufferedReader(new InputStreamReader(DO1LocationDistance.class.getResourceAsStream("/input/aoc2024/d02-input")))) {
-            System.out.println(new D02ReactorReports(parse(reader)).countSafeDampened());
-        }
+        System.out.println(new D02ReactorReports(Utility.readInput(D02ReactorReports.class, D02ReactorReports::parse)).countSafeDampened());
     }
 
-    static Report[] parse(BufferedReader reader) throws IOException {
-        return reader.lines().map(s -> new Report(
+    static Report[] parse(Stream<String> lines) {
+        return lines.map(s -> new Report(
                         Arrays.stream(s.split("\\s+")).mapToLong(Long::parseLong).toArray()
                 ))
                 .toArray(Report[]::new);
