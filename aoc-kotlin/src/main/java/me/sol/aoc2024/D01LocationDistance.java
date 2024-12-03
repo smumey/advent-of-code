@@ -1,12 +1,15 @@
 package me.sol.aoc2024;
 
+import me.sol.Utility;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class DO1LocationDistance {
+public class D01LocationDistance {
     static Locations parse(InputStream reader) {
         var list1 = new ArrayList<Integer>();
         var list2 = new ArrayList<Integer>();
@@ -20,8 +23,15 @@ public class DO1LocationDistance {
     }
 
     public static void main(String[] args) throws IOException {
-        try (var reader = DO1LocationDistance.class.getResourceAsStream("/input/aoc2024/d01-input")) {
-            System.out.println(parse(reader).similarity());
+
+        try (var reader = D01LocationDistance.class.getResourceAsStream("/input/aoc2024/d01-input")) {
+            System.out.println(
+                    Utility.parseInput(
+                            D01LocationDistance.class,
+                            lines -> lines.map(l -> Arrays.stream(l.split("\\s+")).mapToInt(Integer::parseInt).toArray())
+                                    .coll
+                    ).similarity()
+            );
         }
     }
 

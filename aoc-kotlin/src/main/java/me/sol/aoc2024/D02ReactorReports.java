@@ -19,7 +19,7 @@ public class D02ReactorReports {
     }
 
     public static void main(String[] args) throws IOException {
-        try (var reader = new BufferedReader(new InputStreamReader(DO1LocationDistance.class.getResourceAsStream("/input/aoc2024/d02-input")))) {
+        try (var reader = new BufferedReader(new InputStreamReader(D01LocationDistance.class.getResourceAsStream("/input/aoc2024/d02-input")))) {
             System.out.println(new D02ReactorReports(parse(reader)).countSafeDampened());
         }
     }
