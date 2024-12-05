@@ -2,6 +2,7 @@ package me.sol.aoc2024;
 
 import aoc.Coordinate;
 import aoc.Direction;
+import me.sol.Answer;
 import me.sol.Utility;
 
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class D04WordSearch {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(new D04WordSearch(Utility.readInput(D04WordSearch.class, D04WordSearch::parse)).countCrosses());
+        Utility.execute(new D04WordSearch(Utility.readInput(D04WordSearch.class, D04WordSearch::parse)));
     }
 
     int countMatches(Pattern pattern) {
@@ -38,18 +39,19 @@ public class D04WordSearch {
                     while (m.find()) {
                         count += 1;
                     }
-                    System.out.printf("pattern=%s, line=%s count=%d%n", pattern, line, count);
                     return count;
                 })
                 .sum();
     }
 
+    @Answer
     int countWords() {
         var forward = Pattern.compile(search);
         var reverse = Pattern.compile(reversedSearch);
         return countMatches(Pattern.compile(search)) + countMatches(Pattern.compile(reversedSearch));
     }
 
+    @Answer
     int countCrosses() {
         return (int) IntStream.range(1, puzzle.size() - 1)
                 .boxed()
@@ -140,4 +142,3 @@ record Puzzle(String[] lines) {
                 );
     }
 }
-
