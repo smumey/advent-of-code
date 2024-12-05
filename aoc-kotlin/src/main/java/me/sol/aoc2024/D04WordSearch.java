@@ -1,6 +1,7 @@
 package me.sol.aoc2024;
 
 import aoc.Coordinate;
+import aoc.Direction;
 import me.sol.Utility;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 public class D04WordSearch {
     private static final String search = "XMAS";
     private static final String reversedSearch = "SAMX";
+    private static final char[] CROSS_CHARS = {'M', 'S'};
     private final Puzzle puzzle;
 
     D04WordSearch(Puzzle puzzle) {
@@ -24,7 +26,7 @@ public class D04WordSearch {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(new D04WordSearch(Utility.readInput(D04WordSearch.class, D04WordSearch::parse)).countWords());
+        System.out.println(new D04WordSearch(Utility.readInput(D04WordSearch.class, D04WordSearch::parse)).countCrosses());
     }
 
     int countMatches(Pattern pattern) {
@@ -46,6 +48,38 @@ public class D04WordSearch {
         var forward = Pattern.compile(search);
         var reverse = Pattern.compile(reversedSearch);
         return countMatches(Pattern.compile(search)) + countMatches(Pattern.compile(reversedSearch));
+    }
+
+    int countCrosses() {
+        return (int) IntStream.range(1, puzzle.size() - 1)
+                .boxed()
+                .flatMap(y -> IntStream.range(1, puzzle.size() - 1).mapToObj(x -> new Coordinate(x, y)))
+                .filter(this::isMasCross)
+                .count();
+    }
+
+    private char[] upChars(Coordinate coordinate) {
+        char[] chars = {
+                puzzle.getCharAt(coordinate.move(Direction.DOWN).move(Direction.LEFT)),
+                puzzle.getCharAt(coordinate.move(Direction.UP).move(Direction.RIGHT))
+        };
+        Arrays.sort(chars);
+        return chars;
+    }
+
+    private char[] downChars(Coordinate coordinate) {
+        char[] chars = {
+                puzzle.getCharAt(coordinate.move(Direction.UP).move(Direction.LEFT)),
+                puzzle.getCharAt(coordinate.move(Direction.DOWN).move(Direction.RIGHT))
+        };
+        Arrays.sort(chars);
+        return chars;
+    }
+
+    private boolean isMasCross(Coordinate coordinate) {
+        return puzzle.getCharAt(coordinate) == 'A' &&
+                Arrays.equals(CROSS_CHARS, upChars(coordinate)) &&
+                Arrays.equals(CROSS_CHARS, downChars(coordinate));
     }
 }
 
@@ -74,6 +108,10 @@ record Puzzle(String[] lines) {
         int x = coordinate.getX();
         int y = coordinate.getY();
         return 0 <= x && x < n && 0 <= y && y < n;
+    }
+
+    char getCharAt(Coordinate coordinate) {
+        return lines[coordinate.getY()].charAt(coordinate.getX());
     }
 
     Stream<String> diagonals(boolean up) {
