@@ -8,7 +8,6 @@ import me.sol.Utility;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -78,14 +77,13 @@ public class D06GuardGallivant {
         var map = makeBlankMap(labMap);
         copyTo(labMap, map);
         var posCount = 1;
-        var inbounds = (Predicate<Coordinate>) c -> 0 <= c.getY() && c.getY() < map.length && 0 <= c.getX() && c.getX() < map[0].length;
         setCell(map, guardPos, '@');
-        while (inbounds.test(guardPos)) {
+        while (inbounds(map, guardPos)) {
             var newPos = guardPos.move(guardDir);
-            if (inbounds.test(newPos)) {
+            if (inbounds(map, newPos)) {
                 switch (getCell(map, newPos)) {
                     case '#':
-                        guardDir = Direction.values()[(guardDir.ordinal() + 1) % Direction.values().length];
+                        guardDir = turnRight(guardDir);
                         break;
                     case '@':
                         guardPos = newPos;
@@ -103,7 +101,7 @@ public class D06GuardGallivant {
         return posCount;
     }
 
-    void copyTo(int[][] source, int[][] target) {
+    private static void copyTo(int[][] source, int[][] target) {
         for (int i = 0; i < source.length; i++) {
             System.arraycopy(source[i], 0, target[i], 0, source.length);
         }
@@ -121,8 +119,7 @@ public class D06GuardGallivant {
             if (!inbounds(map, nextPos)) {
                 return false;
             }
-            var nextCell = getCell(map, nextPos);
-            if (nextCell == '#') {
+            if (getCell(map, nextPos) == '#') {
                 guardState = new GuardState(guardState.pos(), turnRight(guardState.dir()));
             } else {
                 guardState = new GuardState(nextPos, guardState.dir());
@@ -135,22 +132,20 @@ public class D06GuardGallivant {
     int guardLoopBlockCount() {
         var guardPos = getInitialGuardPos();
         var guardDir = directionMap.get(getCell(labMap, guardPos));
-        var testMap = makeBlankMap(labMap);
         var blocks = new HashSet<Coordinate>();
-//        setCell(map, guardPos, dirSymbolMap.get(guardDir));
         while (inbounds(labMap, guardPos)) {
             var newPos = guardPos.move(guardDir);
             if (inbounds(labMap, newPos)) {
-                int nextCell = getCell(labMap, newPos);
-                if (nextCell == '#') {
+                int newCell = getCell(labMap, newPos);
+                if (newCell == '#') {
                     guardDir = turnRight(guardDir);
                     continue;
                 } else if (!blocks.contains(newPos)) {
-                    copyTo(labMap, testMap);
-                    setCell(testMap, newPos, '#');
-                    if (isLoop(testMap, new GuardState(guardPos, guardDir))) {
+                    setCell(labMap, newPos, '#');
+                    if (isLoop(labMap, new GuardState(guardPos, guardDir))) {
                         blocks.add(newPos);
                     }
+                    setCell(labMap, newPos, newCell);
                 }
             }
             guardPos = newPos;
