@@ -5,9 +5,10 @@ import me.sol.Utility;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.Comparator;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,17 +46,18 @@ public class D05PrintQueue {
         );
     }
 
-    private Map<Integer, Set<Integer>> disallowed() {
-        return Arrays.stream(pageEdit.dependencies)
+    private Function<Integer, Set<Integer>> disallowed() {
+        var collect = Arrays.stream(pageEdit.dependencies)
                 .collect(Collectors.groupingBy(
                         PrintDependency::after,
                         mapping(PrintDependency::before, Collectors.toSet())
                 ));
+        return p -> collect.computeIfAbsent(p, q -> Set.of());
     }
 
-    private boolean isCorrectlyOrdered(int[] update, Map<Integer, Set<Integer>> disallowed) {
+    private boolean isCorrectlyOrdered(int[] update, Function<Integer, Set<Integer>> disallowed) {
         for (int i = 0; i < update.length; i++) {
-            var exclude = disallowed.computeIfAbsent(update[i], x -> Set.of());
+            var exclude = disallowed.apply(update[i]);
             for (int j = i + 1; j < update.length; j++) {
                 if (exclude.contains(update[j])) {
                     return false;
@@ -65,11 +67,34 @@ public class D05PrintQueue {
         return true;
     }
 
+    private Comparator<Integer> comparator(Function<Integer, Set<Integer>> disallowed) {
+        return (p1, p2) -> {
+            if (disallowed.apply(p1).contains(p2)) {
+                return 1;
+            } else if (disallowed.apply(p2).contains(p1)) {
+                return -1;
+            } else {
+                return p1 - p2;
+            }
+        };
+    }
+
     @Answer
-    int middlePageSum() {
+    int p1correctlyOrderedMiddlePageSum() {
         var disallowed = disallowed();
         return Arrays.stream(pageEdit.updates())
                 .filter(update -> isCorrectlyOrdered(update, disallowed))
+                .mapToInt(update -> update[update.length / 2])
+                .sum();
+    }
+
+    @Answer
+    int p2reorderedMiddlePageSum() {
+        var disallowed = disallowed();
+        var comparator = comparator(disallowed);
+        return Arrays.stream(pageEdit.updates())
+                .filter(update -> !isCorrectlyOrdered(update, disallowed))
+                .map(update -> Arrays.stream(update).boxed().sorted(comparator).mapToInt(p -> p).toArray())
                 .mapToInt(update -> update[update.length / 2])
                 .sum();
     }
