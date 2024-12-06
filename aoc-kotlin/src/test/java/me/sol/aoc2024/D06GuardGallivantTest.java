@@ -14,4 +14,10 @@ class D06GuardGallivantTest {
         assertThat(new D06GuardGallivant(Utility.readSample(D06GuardGallivant.class, D06GuardGallivant::parse)).distinctGuardPositionCount())
                 .isEqualTo(41);
     }
+
+    @Test
+    void guardLoopBlockCount() throws IOException {
+        assertThat(new D06GuardGallivant(Utility.readSample(D06GuardGallivant.class, D06GuardGallivant::parse)).guardLoopBlockCount())
+                .isEqualTo(6);
+    }
 }
