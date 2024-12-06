@@ -62,8 +62,8 @@ public class D04WordSearch {
 
     private char[] upChars(Coordinate coordinate) {
         char[] chars = {
-                puzzle.getCharAt(coordinate.move(Direction.DOWN).move(Direction.LEFT)),
-                puzzle.getCharAt(coordinate.move(Direction.UP).move(Direction.RIGHT))
+                puzzle.getCharAt(coordinate.moveFlip(Direction.DOWN).moveFlip(Direction.LEFT)),
+                puzzle.getCharAt(coordinate.moveFlip(Direction.UP).moveFlip(Direction.RIGHT))
         };
         Arrays.sort(chars);
         return chars;
@@ -71,8 +71,8 @@ public class D04WordSearch {
 
     private char[] downChars(Coordinate coordinate) {
         char[] chars = {
-                puzzle.getCharAt(coordinate.move(Direction.UP).move(Direction.LEFT)),
-                puzzle.getCharAt(coordinate.move(Direction.DOWN).move(Direction.RIGHT))
+                puzzle.getCharAt(coordinate.moveFlip(Direction.UP).moveFlip(Direction.LEFT)),
+                puzzle.getCharAt(coordinate.moveFlip(Direction.DOWN).moveFlip(Direction.RIGHT))
         };
         Arrays.sort(chars);
         return chars;
