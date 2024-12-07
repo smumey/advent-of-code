@@ -61,6 +61,12 @@ public class D06GuardGallivant {
         return Direction.values()[(d.ordinal() + 1) % Direction.values().length];
     }
 
+    private static void copyTo(int[][] source, int[][] target) {
+        for (int i = 0; i < source.length; i++) {
+            System.arraycopy(source[i], 0, target[i], 0, source.length);
+        }
+    }
+
     private Coordinate getInitialGuardPos() {
         return IntStream.range(0, labMap.length)
                 .boxed()
@@ -101,12 +107,6 @@ public class D06GuardGallivant {
         return posCount;
     }
 
-    private static void copyTo(int[][] source, int[][] target) {
-        for (int i = 0; i < source.length; i++) {
-            System.arraycopy(source[i], 0, target[i], 0, source.length);
-        }
-    }
-
     boolean inbounds(int[][] map, Coordinate c) {
         return 0 <= c.getY() && c.getY() < map.length && 0 <= c.getX() && c.getX() < map[0].length;
     }
@@ -133,22 +133,25 @@ public class D06GuardGallivant {
         var guardPos = getInitialGuardPos();
         var guardDir = directionMap.get(getCell(labMap, guardPos));
         var blocks = new HashSet<Coordinate>();
+        var notBlocks = new HashSet<Coordinate>();
         while (inbounds(labMap, guardPos)) {
-            var newPos = guardPos.move(guardDir);
-            if (inbounds(labMap, newPos)) {
-                int newCell = getCell(labMap, newPos);
-                if (newCell == '#') {
+            var nextPos = guardPos.move(guardDir);
+            if (inbounds(labMap, nextPos)) {
+                int nextCell = getCell(labMap, nextPos);
+                if (nextCell == '#') {
                     guardDir = turnRight(guardDir);
                     continue;
-                } else if (!blocks.contains(newPos)) {
-                    setCell(labMap, newPos, '#');
+                } else if (!blocks.contains(nextPos) && !notBlocks.contains(nextPos)) {
+                    setCell(labMap, nextPos, '#');
                     if (isLoop(labMap, new GuardState(guardPos, guardDir))) {
-                        blocks.add(newPos);
+                        blocks.add(nextPos);
+                    } else {
+                        notBlocks.add(nextPos);
                     }
-                    setCell(labMap, newPos, newCell);
+                    setCell(labMap, nextPos, nextCell);
                 }
             }
-            guardPos = newPos;
+            guardPos = nextPos;
         }
         return blocks.size();
     }
