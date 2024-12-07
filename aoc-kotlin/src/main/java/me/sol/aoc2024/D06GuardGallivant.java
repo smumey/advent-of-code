@@ -44,22 +44,16 @@ public class D06GuardGallivant {
                 .toArray(int[][]::new);
     }
 
-    private static int[][] makeBlankMap(int[][] map) {
+    private static int[][] copy(int[][] map) {
         var c = new int[map.length][];
         for (int i = 0; i < c.length; i++) {
-            c[i] = new int[map[i].length];
+            c[i] = map[i].clone();
         }
         return c;
     }
 
     private static Direction turnRight(Direction d) {
         return Direction.values()[(d.ordinal() + 1) % Direction.values().length];
-    }
-
-    private static void copyTo(int[][] source, int[][] target) {
-        for (int i = 0; i < source.length; i++) {
-            System.arraycopy(source[i], 0, target[i], 0, source.length);
-        }
     }
 
     private Coordinate getInitialGuardPos() {
@@ -75,8 +69,7 @@ public class D06GuardGallivant {
     int distinctGuardPositionCount() {
         var guardPos = getInitialGuardPos();
         var guardDir = directionMap.get(getCell(labMap, guardPos));
-        var map = makeBlankMap(labMap);
-        copyTo(labMap, map);
+        var map = copy(labMap);
         var posCount = 1;
         setCell(map, guardPos, '@');
         while (inbounds(map, guardPos)) {
