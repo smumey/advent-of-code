@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.LongBinaryOperator;
 import java.util.stream.Stream;
 
 public class D07BridgeRepair {
@@ -32,12 +33,29 @@ public class D07BridgeRepair {
 
 
     @Answer
-    long calibrationSum() {
-        return Arrays.stream(equations).mapToLong(Equation::solve).sum();
+    long p1CalibrationSum() {
+        return Arrays.stream(equations)
+                .mapToLong(
+                        eq -> eq.solve(List.of(
+                                Long::sum,
+                                (x, y) -> x * y
+                        ))
+                ).sum();
+    }
+
+    @Answer
+    long p2CalibrationSum() {
+        return Arrays.stream(equations)
+                .mapToLong(eq -> eq.solve(List.of(
+                                Long::sum,
+                                (x, y) -> x * y,
+                                (x, y) -> Long.parseLong(Long.toString(x) + y)
+                        ))
+                ).sum();
     }
 
     record Equation(long answer, long[] numbers) {
-        private long solve() {
+        long solve(List<LongBinaryOperator> operators) {
             var nodes = new LinkedList<Node>();
             nodes.add(new Node(numbers[0], 0));
             while (!nodes.isEmpty()) {
@@ -45,7 +63,7 @@ public class D07BridgeRepair {
                 if (node.value() == answer && node.depth() == numbers.length - 1) {
                     return answer;
                 }
-                nodes.addAll(node.children(this));
+                nodes.addAll(node.children(this, operators));
             }
             return 0L;
         }
@@ -53,12 +71,9 @@ public class D07BridgeRepair {
     }
 
     record Node(long value, int depth) {
-        List<Node> children(Equation equation) {
-            return depth < equation.numbers.length - 1 ? Stream.of(
-                            new Node(value + equation.numbers[depth + 1], depth + 1),
-                            new Node(value * equation.numbers[depth + 1], depth + 1),
-                            new Node(Long.parseLong(String.valueOf(value) + equation.numbers[depth + 1]), depth + 1)
-                    )
+        List<Node> children(Equation equation, List<LongBinaryOperator> operators) {
+            return depth < equation.numbers.length - 1 ? operators.stream()
+                    .map(op -> new Node(op.applyAsLong(value, equation.numbers[depth + 1]), depth + 1))
                     .filter(n -> n.value <= equation.answer)
                     .toList()
                     : List.of();
