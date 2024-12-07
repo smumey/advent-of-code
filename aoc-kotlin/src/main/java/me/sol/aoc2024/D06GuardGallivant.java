@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toMap;
-
 public class D06GuardGallivant {
     static final Map<Integer, Direction> directionMap = Map.of(
             (int) '^', Direction.UP,
@@ -20,9 +18,6 @@ public class D06GuardGallivant {
             (int) '>', Direction.RIGHT,
             (int) 'v', Direction.DOWN
     );
-
-    static final Map<Direction, Integer> dirSymbolMap = directionMap.entrySet().stream()
-            .collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
 
     private final int[][] labMap;
 
