@@ -14,4 +14,10 @@ class D08ResonantCollinearityTest {
         assertThat(new D08ResonantCollinearity(Utility.readSample(D08ResonantCollinearityTest.class, Utility::parseCharGrid)).p1CountAntinodes())
                 .isEqualTo(14);
     }
+
+    @Test
+    void p2CountAntinodes() throws IOException {
+        assertThat(new D08ResonantCollinearity(Utility.readSample(D08ResonantCollinearityTest.class, Utility::parseCharGrid)).p2CountAntinodes())
+                .isEqualTo(34);
+    }
 }

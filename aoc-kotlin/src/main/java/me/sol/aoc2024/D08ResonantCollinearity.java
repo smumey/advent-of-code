@@ -5,6 +5,7 @@ import me.sol.Utility;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -24,27 +25,52 @@ public class D08ResonantCollinearity {
 
     @Answer
     long p1CountAntinodes() {
+        return countAntinodes(this::type1Antinodes);
+    }
+
+    private long countAntinodes(UnaryOperator<int[]> getAntinodes) {
         return Arrays.stream(FREQUENCIES)
                 .mapToObj(grid::findAll)
-                .map(this::antinodes)
+                .map(getAntinodes)
                 .flatMapToInt(Arrays::stream)
                 .filter(a -> a != Grid.OUT)
                 .distinct()
                 .count();
     }
 
-    private int[] antinodes(int[] antennas) {
+    @Answer
+    long p2CountAntinodes() {
+        return countAntinodes(this::allAntinodes);
+    }
+
+    private int[] type1Antinodes(int[] antennas) {
         return IntStream.range(0, antennas.length)
                 .mapToObj(
                         i -> IntStream.range(i + 1, antennas.length)
-                                .flatMap(j -> Arrays.stream(antinodes(antennas[i], antennas[j])))
+                                .flatMap(j -> Arrays.stream(type1Antinodes(antennas[i], antennas[j])))
 
                 )
                 .flatMapToInt(a -> a)
                 .toArray();
     }
 
-    private int[] antinodes(int antenna1, int antenna2) {
+    private int[] allAntinodes(int[] antennas) {
+        return IntStream.range(0, antennas.length)
+                .mapToObj(
+                        i -> IntStream.range(i + 1, antennas.length)
+                                .flatMap(j -> IntStream.concat(
+                                                Arrays.stream(type1Antinodes(antennas[i], antennas[j])),
+                                                Arrays.stream(type2Antinodes(antennas[i], antennas[j]))
+                                        )
+                                )
+
+                )
+                .flatMapToInt(a -> a)
+                .filter(a -> a != Grid.OUT)
+                .toArray();
+    }
+
+    private int[] type1Antinodes(int antenna1, int antenna2) {
         int deltaX = grid.getX(antenna2) - grid.getX(antenna1);
         int deltaY = grid.getY(antenna2) - grid.getY(antenna1);
         var antinodes = new int[4];
@@ -60,8 +86,21 @@ public class D08ResonantCollinearity {
         }
         int n2 = grid.move(antenna2, deltaX, deltaY);
         if (n2 != Grid.OUT) {
-            antinodes[i++] = n2;
+            antinodes[i] = n2;
         }
         return antinodes;
     }
+
+    private int[] type2Antinodes(int antenna1, int antenna2) {
+        int deltaX = grid.getX(antenna2) - grid.getX(antenna1);
+        int deltaY = grid.getY(antenna2) - grid.getY(antenna1);
+        int gcd = (int) Utility.greatestCommonDenominator(deltaX, deltaY);
+        int dX = deltaX / gcd;
+        int dY = deltaY / gcd;
+        return IntStream.concat(
+                IntStream.iterate(antenna1, n -> n != Grid.OUT, n -> grid.move(n, dX, dY)),
+                IntStream.iterate(antenna2, n -> n != Grid.OUT, n -> grid.move(n, -dX, -dY))
+        ).toArray();
+    }
+
 }

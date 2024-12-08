@@ -94,6 +94,11 @@ public final class Grid {
                 .toArray();
     }
 
+    IntStream streamCoordinates() {
+        return IntStream.range(0, rows.length)
+                .flatMap(y -> IntStream.range(0, rows[0].length).map(x -> toCoordinate(x, y)));
+    }
+
     public void printAsChars(Writer writer) throws IOException {
         for (int j = 0; j < rows.length; j++) {
             for (int i = 0; i < rows[0].length; i++) {
