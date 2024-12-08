@@ -1,7 +1,7 @@
 package aoc
 
 data class Coordinate(val x: Int, val y: Int) {
-    fun moveFlip(direction: Direction): Coordinate {
+    fun moveMirrored(direction: Direction): Coordinate {
         return when (direction) {
             Direction.UP -> Coordinate(x, y + 1)
             Direction.RIGHT -> Coordinate(x + 1, y)

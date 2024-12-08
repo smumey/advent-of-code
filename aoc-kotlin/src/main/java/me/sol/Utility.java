@@ -1,5 +1,7 @@
 package me.sol;
 
+import me.sol.aoc2024.Grid;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -46,5 +48,18 @@ public final class Utility {
                         throw new RuntimeException(e);
                     }
                 });
+    }
+
+    public static <T> Grid parseCharGrid(Stream<String> lines) {
+        return new Grid(
+                lines.map(l -> l.chars().mapToLong(c -> c).toArray()).toArray(long[][]::new)
+        );
+    }
+
+    public static long greatestCommonDenominator(long a, long b) {
+        if (b == 0) {
+            return a;
+        }
+        return greatestCommonDenominator(b, a % b);
     }
 }

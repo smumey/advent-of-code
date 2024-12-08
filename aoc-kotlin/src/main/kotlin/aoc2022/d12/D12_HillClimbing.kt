@@ -28,7 +28,7 @@ data class TopoMap(val rows: List<String>) {
 
     fun downNeighbours(coordinate: Coordinate): List<Coordinate> {
         val neigbours = Direction.values()
-            .map { coordinate.moveFlip(it) }
+            .map { coordinate.moveMirrored(it) }
             .filter { inbounds(it) }
             .filter { height(coordinate) - height(it) <= 1 }
         return neigbours
@@ -36,7 +36,7 @@ data class TopoMap(val rows: List<String>) {
 
     fun upNeighbours(coordinate: Coordinate): List<Coordinate> {
         val neigbours = Direction.values()
-            .map { coordinate.moveFlip(it) }
+            .map { coordinate.moveMirrored(it) }
             .filter { inbounds(it) }
             .filter { height(it) - height(coordinate) <= 1 }
         return neigbours

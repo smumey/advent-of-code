@@ -26,7 +26,7 @@ data class HorizontalRock(val bottomLeft: Coordinate) : Rock {
             Direction.LEFT -> bottomLeft.x
         }
 
-    override fun move(direction: Direction) = HorizontalRock(bottomLeft.moveFlip(direction))
+    override fun move(direction: Direction) = HorizontalRock(bottomLeft.moveMirrored(direction))
 }
 
 data class CrossRock(val bottomLeft: Coordinate) : Rock {
@@ -46,7 +46,7 @@ data class CrossRock(val bottomLeft: Coordinate) : Rock {
             Direction.LEFT -> bottomLeft.x
         }
 
-    override fun move(direction: Direction) = CrossRock(bottomLeft.moveFlip(direction))
+    override fun move(direction: Direction) = CrossRock(bottomLeft.moveMirrored(direction))
 }
 
 data class CornerRock(val bottomLeft: Coordinate) : Rock {
@@ -67,7 +67,7 @@ data class CornerRock(val bottomLeft: Coordinate) : Rock {
             Direction.LEFT -> bottomLeft.x
         }
 
-    override fun move(direction: Direction) = CornerRock(bottomLeft.moveFlip(direction))
+    override fun move(direction: Direction) = CornerRock(bottomLeft.moveMirrored(direction))
 }
 
 data class VerticalRock(val bottomLeft: Coordinate) : Rock {
@@ -83,7 +83,7 @@ data class VerticalRock(val bottomLeft: Coordinate) : Rock {
             Direction.LEFT -> bottomLeft.x
         }
 
-    override fun move(direction: Direction) = VerticalRock(bottomLeft.moveFlip(direction))
+    override fun move(direction: Direction) = VerticalRock(bottomLeft.moveMirrored(direction))
 }
 
 data class BoulderRock(val bottomLeft: Coordinate) : Rock {
@@ -99,7 +99,7 @@ data class BoulderRock(val bottomLeft: Coordinate) : Rock {
             Direction.LEFT -> bottomLeft.x
         }
 
-    override fun move(direction: Direction) = BoulderRock(bottomLeft.moveFlip(direction))
+    override fun move(direction: Direction) = BoulderRock(bottomLeft.moveMirrored(direction))
 }
 
 fun parse(line: String): List<Direction> {

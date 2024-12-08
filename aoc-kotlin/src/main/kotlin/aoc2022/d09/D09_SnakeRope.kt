@@ -35,7 +35,7 @@ fun countTailPositions(moveSteps: List<MoveSteps>, tailLength: Int = 1): Int {
     val initialCoord = Coordinate(0, 0)
     val headPositions = moveSteps.fold(listOf(initialCoord)) { coords, moveStep ->
         (0 until moveStep.steps).fold(coords) { stepCoords, _ ->
-            stepCoords + stepCoords.last().moveFlip(moveStep.direction)
+            stepCoords + stepCoords.last().moveMirrored(moveStep.direction)
         }
     }
     val tailPositions = (0 until tailLength).fold(headPositions) { parentCoords, _ ->

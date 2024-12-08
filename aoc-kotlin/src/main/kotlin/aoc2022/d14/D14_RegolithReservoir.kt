@@ -43,7 +43,7 @@ data class SandState(
         if (sandCoordinate.y >= maxDepth) return null
         val nextSandCoordinate =
             listOf(listOf(Direction.UP), listOf(Direction.UP, Direction.LEFT), listOf(Direction.UP, Direction.RIGHT))
-                .map { it.fold(sandCoordinate) { sand, dir -> sand.moveFlip(dir) } }
+                .map { it.fold(sandCoordinate) { sand, dir -> sand.moveMirrored(dir) } }
                 .find { !filled.contains(it) }
         return if (nextSandCoordinate == null) {
             SandState(maxDepth, filled + sandCoordinate, sandSource, sandRestCount + 1)
@@ -56,7 +56,7 @@ data class SandState(
         if (filled.contains(sandSource)) return null
         val nextSandCoordinate =
             listOf(listOf(Direction.UP), listOf(Direction.UP, Direction.LEFT), listOf(Direction.UP, Direction.RIGHT))
-                .map { it.fold(sandCoordinate) { sand, dir -> sand.moveFlip(dir) } }
+                .map { it.fold(sandCoordinate) { sand, dir -> sand.moveMirrored(dir) } }
                 .find { !(filled.contains(it)) && it.y < maxDepth + 2 }
         return if (nextSandCoordinate == null) {
             SandState(maxDepth, filled + sandCoordinate, sandSource, sandRestCount + 1)
