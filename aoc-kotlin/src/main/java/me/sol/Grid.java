@@ -1,4 +1,4 @@
-package me.sol.aoc2024;
+package me.sol;
 
 import aoc.Direction;
 
@@ -87,7 +87,7 @@ public final class Grid {
         return "Grid[lines=" + rows + ']';
     }
 
-    int[] findAll(long value) {
+    public int[] findAll(long value) {
         return IntStream.range(0, height())
                 .flatMap(j -> IntStream.range(0, width()).map(i -> toCoordinate(i, j)))
                 .filter(c -> getValue(c) == value)

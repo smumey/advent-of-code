@@ -1,6 +1,7 @@
 package me.sol.aoc2024;
 
 import me.sol.Answer;
+import me.sol.Grid;
 import me.sol.Utility;
 
 import java.io.IOException;

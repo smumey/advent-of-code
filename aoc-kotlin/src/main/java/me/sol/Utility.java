@@ -1,7 +1,5 @@
 package me.sol;
 
-import me.sol.aoc2024.Grid;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
