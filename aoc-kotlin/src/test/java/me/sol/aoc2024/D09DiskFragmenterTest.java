@@ -13,4 +13,9 @@ class D09DiskFragmenterTest {
     void p1Checksum() throws IOException {
         assertThat(new D09DiskFragmenter(Utility.readSample(getClass(), D09DiskFragmenter::parse)).p1Checksum()).isEqualTo(1928L);
     }
+
+    @Test
+    void p2Checksum() throws IOException {
+        assertThat(new D09DiskFragmenter(Utility.readSample(getClass(), D09DiskFragmenter::parse)).p2Checksum()).isEqualTo(2858L);
+    }
 }
