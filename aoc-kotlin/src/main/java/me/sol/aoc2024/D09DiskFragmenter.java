@@ -5,10 +5,11 @@ import me.sol.Utility;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.Comparator.comparing;
 
 public class D09DiskFragmenter {
     private final int[] diskLayout;
@@ -68,7 +69,7 @@ public class D09DiskFragmenter {
     @Answer
     long p2Checksum() {
         var blocks = makeBlocks();
-        var spaceLists = Stream.generate(() -> new PriorityQueue<Allocation>(Comparator.comparing(Allocation::index))).limit(10).toList();
+        var spaceQueues = Stream.generate(() -> new PriorityQueue<>(comparing(Allocation::index))).limit(10).toList();
         var fileList = new ArrayList<Allocation>(diskLayout.length / 2 + 1);
         for (int i = 0, offset = 0; i < diskLayout.length; i++) {
             if (diskLayout[i] > 0) {
@@ -78,26 +79,24 @@ public class D09DiskFragmenter {
                 } else {
                     var space = new Allocation(-1, offset, diskLayout[i]);
                     for (int size = 1; size <= diskLayout[i]; size++) {
-                        spaceLists.get(size).add(space);
+                        spaceQueues.get(size).add(space);
                     }
                 }
                 offset += diskLayout[i];
             }
         }
-        var fileIterator = fileList.reversed().iterator();
-        while (fileIterator.hasNext()) {
-            var file = fileIterator.next();
-            var spaceList = spaceLists.get(file.size());
-            if (spaceList.isEmpty()) {
+        for (var file : fileList.reversed()) {
+            var spaceQueue = spaceQueues.get(file.size());
+            if (spaceQueue.isEmpty()) {
                 continue;
             }
-            var space = spaceList.poll();
+            var space = spaceQueue.poll();
             if (file.index() < space.index()) {
-                spaceList.add(space);
+                spaceQueue.add(space);
                 continue;
             }
             for (int s = 1; s <= space.size(); s++) {
-                spaceLists.get(s).remove(space);
+                spaceQueues.get(s).remove(space);
             }
             for (int i = 0; i < file.size(); i++) {
                 blocks[space.index() + i] = file.id();
@@ -107,7 +106,7 @@ public class D09DiskFragmenter {
             if (remaining > 0) {
                 var remainingSpace = new Allocation(-1, space.index() + file.size(), remaining);
                 for (int s = 1; s <= remaining; s++) {
-                    spaceLists.get(s).add(remainingSpace);
+                    spaceQueues.get(s).add(remainingSpace);
                 }
             }
         }
