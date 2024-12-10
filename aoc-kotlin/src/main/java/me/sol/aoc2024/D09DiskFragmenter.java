@@ -5,7 +5,8 @@ import me.sol.Utility;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -67,7 +68,7 @@ public class D09DiskFragmenter {
     @Answer
     long p2Checksum() {
         var blocks = makeBlocks();
-        var spaceLists = Stream.generate(() -> new LinkedList<Allocation>()).limit(10).toList();
+        var spaceLists = Stream.generate(() -> new PriorityQueue<Allocation>(Comparator.comparing(Allocation::index))).limit(10).toList();
         var fileList = new ArrayList<Allocation>(diskLayout.length / 2 + 1);
         for (int i = 0, offset = 0; i < diskLayout.length; i++) {
             if (diskLayout[i] > 0) {
@@ -90,9 +91,9 @@ public class D09DiskFragmenter {
             if (spaceList.isEmpty()) {
                 continue;
             }
-            var space = spaceList.removeFirst();
+            var space = spaceList.poll();
             if (file.index() < space.index()) {
-                spaceList.addFirst(space);
+                spaceList.add(space);
                 continue;
             }
             for (int s = 1; s <= space.size(); s++) {
@@ -106,15 +107,7 @@ public class D09DiskFragmenter {
             if (remaining > 0) {
                 var remainingSpace = new Allocation(-1, space.index() + file.size(), remaining);
                 for (int s = 1; s <= remaining; s++) {
-                    var it = spaceLists.get(s).listIterator();
-                    while (it.hasNext()) {
-                        var next = it.next();
-                        if (next.index() > space.index()) {
-                            it.previous();
-                            it.add(remainingSpace);
-                            break;
-                        }
-                    }
+                    spaceLists.get(s).add(remainingSpace);
                 }
             }
         }
