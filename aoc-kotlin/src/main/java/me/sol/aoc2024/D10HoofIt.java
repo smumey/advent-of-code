@@ -39,7 +39,6 @@ public class D10HoofIt {
             queue.add(peak);
             while (!queue.isEmpty()) {
                 var node = queue.removeLast();
-                System.out.printf("node y=%d x=%d value=%c%n", grid.getY(node), grid.getX(node), (char) grid.getValue(node));
                 seen.add(node);
                 if (grid.getValue(node) == '0') {
                     trailheadCounts += 1;
@@ -50,4 +49,26 @@ public class D10HoofIt {
         }
         return trailheadCounts;
     }
+
+    @Answer
+    long p2TrailheadScoreSums() {
+        var peaks = grid.findAll('9');
+        var trailheadCounts = 0; // Arrays.stream(grid.findAll('0')).boxed().collect(toMap(Function.identity(), v -> 0));
+        for (var peak : peaks) {
+            var queue = new LinkedList<Integer>();
+            var seen = new HashSet<Integer>();
+            queue.add(peak);
+            while (!queue.isEmpty()) {
+                var node = queue.pop();
+                seen.add(node);
+                if (grid.getValue(node) == '0') {
+                    trailheadCounts += 1;
+                } else {
+                    neighbours(node).filter(c -> !seen.contains(c)).forEach(queue::add);
+                }
+            }
+        }
+        return trailheadCounts;
+    }
+
 }

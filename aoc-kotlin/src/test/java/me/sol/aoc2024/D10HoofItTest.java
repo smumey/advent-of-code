@@ -14,4 +14,10 @@ class D10HoofItTest {
         assertThat(new D10HoofIt(Utility.readSample(getClass(), Utility::parseCharGrid)).p1TrailheadScoreSums())
                 .isEqualTo(36);
     }
+
+    @Test
+    void p2TrailheadScoreSums() throws IOException {
+        assertThat(new D10HoofIt(Utility.readSample(getClass(), Utility::parseCharGrid)).p2TrailheadScoreSums())
+                .isEqualTo(81);
+    }
 }
