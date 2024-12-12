@@ -4,6 +4,7 @@ import aoc.Direction;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -59,6 +60,16 @@ public final class Grid {
         int newX = getX(origin) + deltaX;
         int newY = getY(origin) + deltaY;
         return inbounds(newX, newY) ? toCoordinate(newX, newY) : OUT;
+    }
+
+    public IntStream neighbours(int origin) {
+        return Arrays.stream(Direction.values())
+                .mapToInt(d -> move(origin, d))
+                .filter(n -> n != OUT);
+    }
+
+    public String coordToString(int coordinate) {
+        return "(%d,%d)".formatted(getX(coordinate), getY(coordinate));
     }
 
     public int width() {
