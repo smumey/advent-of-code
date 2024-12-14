@@ -50,6 +50,33 @@ public class D14RestroomRedoubt {
                 .reduce(1, (x, y) -> x * y);
     }
 
+    private void clear(char[][] grid) {
+        Arrays.stream(grid).forEach(row -> Arrays.fill(row, '.'));
+    }
+
+    private void print(char[][] grid) {
+        Arrays.stream(grid).forEach(System.out::println);
+    }
+
+    @Answer
+    int p2ChristmasTree() {
+        var grid = Stream.generate(() -> new char[width]).limit(height).toArray(char[][]::new);
+
+        var moved = robots.clone();
+        for (int t = 1; true; t++) {
+            for (int i = 0; i < robots.length; i++) {
+                moved[i] = robots[i].move(t, width, height);
+            }
+            if (Arrays.stream(moved).mapToInt(r -> r.y() * width + r.x()).distinct().count() == robots.length) {
+                System.out.printf("Grid at time %d s%n", t);
+                clear(grid);
+                Arrays.stream(moved).forEach(r -> grid[r.y()][r.x()] = '*');
+                print(grid);
+                return t;
+            }
+        }
+    }
+
     record Robot(int x, int y, int velX, int velY) {
         Robot move(int seconds, int width, int height) {
             return new Robot(

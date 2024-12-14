@@ -25,5 +25,6 @@ tasks.test {
 //}
 
 application {
-    mainClass.set("MainKt")
+//    mainClass = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "NULL"
+    mainClass.set((project.properties["mainClass"] as String?) ?: "NULL")
 }
