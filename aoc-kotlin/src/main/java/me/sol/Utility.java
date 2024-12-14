@@ -6,9 +6,11 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class Utility {
@@ -59,5 +61,13 @@ public final class Utility {
             return a;
         }
         return greatestCommonDenominator(b, a % b);
+    }
+
+    public static <T> Stream<List<T>> sliding(List<T> list, int size) {
+        if (size > list.size()) {
+            return Stream.empty();
+        }
+        return IntStream.range(0, list.size() - size + 1)
+                .mapToObj(start -> list.subList(start, start + size));
     }
 }
