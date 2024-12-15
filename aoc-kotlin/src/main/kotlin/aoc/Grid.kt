@@ -32,7 +32,11 @@ data class LongCoordinate(val x: Long, val y: Long) {
 }
 
 enum class Direction {
-    UP, RIGHT, DOWN, LEFT
+    UP, RIGHT, DOWN, LEFT;
+
+    fun opposite(): Direction {
+        return Direction.entries.get((this.ordinal + 2) % 4)
+    }
 }
 
 data class Coordinate3D(val x: Int, val y: Int, val z: Int) {

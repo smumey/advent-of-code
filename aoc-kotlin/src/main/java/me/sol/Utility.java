@@ -14,9 +14,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class Utility {
-    private Utility() {
-    }
-
     public static <T> T readInput(Class<?> clazz, Function<Stream<String>, T> parser) throws IOException {
         return read(clazz, parser, "input");
     }
@@ -69,5 +66,14 @@ public final class Utility {
         }
         return IntStream.range(0, list.size() - size + 1)
                 .mapToObj(start -> list.subList(start, start + size));
+    }
+
+    public static long[][] copy(long[][] map) {
+        return Arrays.stream(map)
+                .map(r -> r.clone())
+                .toArray(long[][]::new);
+    }
+
+    private Utility() {
     }
 }

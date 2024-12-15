@@ -2,8 +2,7 @@ package me.sol;
 
 import aoc.Direction;
 
-import java.io.IOException;
-import java.io.Writer;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -110,13 +109,17 @@ public final class Grid {
                 .flatMap(y -> IntStream.range(0, rows[0].length).map(x -> toCoordinate(x, y)));
     }
 
-    public void printAsChars(Writer writer) throws IOException {
+    public void printAsChars(PrintStream printStream) {
         for (int j = 0; j < rows.length; j++) {
             for (int i = 0; i < rows[0].length; i++) {
-                writer.append((char) rows[j][i]);
+                printStream.append((char) rows[j][i]);
             }
-            writer.write(System.lineSeparator());
+            printStream.println();
         }
+    }
+
+    public Grid copy() {
+        return new Grid(Utility.copy(rows));
     }
 
 }
