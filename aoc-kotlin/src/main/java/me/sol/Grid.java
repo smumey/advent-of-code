@@ -87,11 +87,11 @@ public final class Grid {
         if (obj == this) {
             return true;
         }
-        if (obj == null || obj.getClass() != this.getClass()) {
+        if (obj == null || obj.getClass() != getClass()) {
             return false;
         }
         var that = (Grid) obj;
-        return Arrays.deepEquals(this.rows, that.rows);
+        return Arrays.deepEquals(rows, that.rows);
     }
 
     @Override
@@ -144,5 +144,4 @@ public final class Grid {
     public long[][] getRows() {
         return Utility.copy(rows);
     }
-
 }

@@ -6,8 +6,15 @@ import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.PriorityQueue;
 import java.util.function.Function;
+import java.util.function.ToLongFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
@@ -75,5 +82,41 @@ public final class Utility {
     }
 
     private Utility() {
+    }
+
+    public <S> PathResponse<S, Long> shortestPath(List<? extends S> nodes, Function<S, Map<S, Long>> edgeGenerator, S source) {
+        var distances = new HashMap<S, Long>();
+        var dist = (ToLongFunction<S>) node -> distances.computeIfAbsent(node, n -> Long.MAX_VALUE);
+        distances.put(source, 0L);
+        var queue = new PriorityQueue<S>(Comparator.comparing(node -> dist.applyAsLong(node)));
+        var active = new HashSet<S>();
+        queue.addAll(nodes);
+        active.addAll(nodes);
+        var previous = new HashMap<S, S>();
+        while (!queue.isEmpty()) {
+            var u = queue.poll();
+            if (!active.contains(u)) {
+                continue;
+            }
+            active.remove(u);
+            long distU = dist.applyAsLong(u);
+            var edges = edgeGenerator.apply(u);
+            edges.forEach((v, edgeDist) -> {
+                if (active.contains(v)) {
+                    var distV = dist.applyAsLong(v);
+                    var altDist = distU + edgeDist;
+                    if (altDist < distV) {
+                        queue.remove(v);
+                        distances.put(v, altDist);
+                        queue.offer(v);
+                        previous.put(v, u);
+                    }
+                }
+            });
+        }
+        return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
+    }
+
+    record PathResponse<S>(ToLongFunction<S> distances, Function<S, Optional<S>> previous) {
     }
 }
