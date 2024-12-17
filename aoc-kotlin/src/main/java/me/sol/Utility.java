@@ -81,23 +81,17 @@ public final class Utility {
                 .toArray(long[][]::new);
     }
 
-    private Utility() {
-    }
-
-    public <S> PathResponse<S, Long> shortestPath(List<? extends S> nodes, Function<S, Map<S, Long>> edgeGenerator, S source) {
+    public static <S> PathResponse<S> findShortestPath(List<? extends S> nodes, Function<S, Map<S, Long>> edgeGenerator, S source) {
         var distances = new HashMap<S, Long>();
         var dist = (ToLongFunction<S>) node -> distances.computeIfAbsent(node, n -> Long.MAX_VALUE);
         distances.put(source, 0L);
-        var queue = new PriorityQueue<S>(Comparator.comparing(node -> dist.applyAsLong(node)));
-        var active = new HashSet<S>();
+        var queue = new PriorityQueue<S>(nodes.size(), Comparator.comparing(node -> dist.applyAsLong(node)));
+        var active = new HashSet<S>(nodes.size());
         queue.addAll(nodes);
         active.addAll(nodes);
         var previous = new HashMap<S, S>();
         while (!queue.isEmpty()) {
             var u = queue.poll();
-            if (!active.contains(u)) {
-                continue;
-            }
             active.remove(u);
             long distU = dist.applyAsLong(u);
             var edges = edgeGenerator.apply(u);
@@ -117,6 +111,9 @@ public final class Utility {
         return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
     }
 
-    record PathResponse<S>(ToLongFunction<S> distances, Function<S, Optional<S>> previous) {
+    private Utility() {
+    }
+
+    public record PathResponse<S>(ToLongFunction<S> distances, Function<S, Optional<S>> previous) {
     }
 }
