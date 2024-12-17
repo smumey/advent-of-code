@@ -13,4 +13,9 @@ class D16ReindeerMazeTest {
     void p1LeastCost() throws IOException {
         assertThat(new D16ReindeerMaze(Utility.readSample(getClass(), Utility::parseCharGrid)).p1LeastCost()).isEqualTo(7036L);
     }
+
+    @Test
+    void p2AllOptimalPathNodesCount() throws IOException {
+        assertThat(new D16ReindeerMaze(Utility.readSample(getClass(), Utility::parseCharGrid)).p2AllOptimalPathNodesCount()).isEqualTo(45L);
+    }
 }

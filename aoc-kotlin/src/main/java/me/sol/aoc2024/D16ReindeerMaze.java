@@ -59,6 +59,23 @@ public class D16ReindeerMaze {
         return pathResponse.distances().applyAsLong(new Node(exit, Direction.RIGHT));
     }
 
+    @Answer
+    long p2AllOptimalPathNodesCount() {
+        var nodes = nodes();
+        int startPos = Arrays.stream(maze.findAll('S')).findFirst().orElseThrow();
+        int endPos = Arrays.stream(maze.findAll('E')).findFirst().orElseThrow();
+        var edgeMap = edgeMap(nodes);
+        var toPathResponse = Utility.findShortestPath(nodes, n -> edgeMap.get(n), new Node(startPos, Direction.RIGHT));
+        var fromPathResponse = Utility.findShortestPath(nodes, n -> edgeMap.get(n), new Node(endPos, Direction.LEFT));
+        var minDist = toPathResponse.distances().applyAsLong(new Node(endPos, Direction.RIGHT));
+//        System.out.printf("to dist = %d, from dist=%d%n", toPathResponse.distances().applyAsLong(new Node(endPos, Direction.RIGHT)), fromPathResponse.distances().applyAsLong(new Node(startPos, Direction.RIGHT)));
+        return nodes.stream()
+                .filter(n -> toPathResponse.distances().applyAsLong(n) + fromPathResponse.distances().applyAsLong(new Node(n.pos(), n.direction().opposite())) == minDist)
+                .mapToInt(Node::pos)
+                .distinct()
+                .count();
+    }
+
     record Node(int pos, Direction direction) {
     }
 }
