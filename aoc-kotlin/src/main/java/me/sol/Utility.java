@@ -82,13 +82,13 @@ public final class Utility {
     }
 
     public static <S> PathResponse<S> findShortestPath(List<? extends S> nodes, Function<S, Map<S, Long>> edgeGenerator, S source) {
+        var start = System.currentTimeMillis();
         var distances = new HashMap<S, Long>();
         var dist = (ToLongFunction<S>) node -> distances.computeIfAbsent(node, n -> Long.MAX_VALUE);
         distances.put(source, 0L);
         var queue = new PriorityQueue<S>(nodes.size(), Comparator.comparing(node -> dist.applyAsLong(node)));
-        var active = new HashSet<S>(nodes.size());
+        var active = new HashSet<S>(nodes);
         queue.addAll(nodes);
-        active.addAll(nodes);
         var previous = new HashMap<S, S>();
         while (!queue.isEmpty()) {
             var u = queue.poll();
@@ -108,7 +108,15 @@ public final class Utility {
                 }
             });
         }
+        Logger.getLogger(Utility.class.getName()).log(Level.INFO, "shortest path took %d ms".formatted(System.currentTimeMillis() - start));
         return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
+    }
+
+    public static int[] parseInts(String line) {
+        return Arrays.stream(line.split("[\\s,]+"))
+                .filter(s -> s.matches("^-?\\d+$"))
+                .mapToInt(Integer::parseInt)
+                .toArray();
     }
 
     private Utility() {
