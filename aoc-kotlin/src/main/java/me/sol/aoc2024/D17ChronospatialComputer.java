@@ -6,11 +6,10 @@ import me.sol.Utility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -24,16 +23,11 @@ public class D17ChronospatialComputer {
 
     static PState parse(Stream<String> lineStream) {
         var lines = lineStream.toList();
-        int a = Utility.parseInts(lines.get(0))[0];
         return new PState(
-                a,
-                a,
+                Utility.parseInts(lines.get(0))[0],
                 Utility.parseInts(lines.get(1))[0],
                 Utility.parseInts(lines.get(2))[0],
-                Arrays.stream(Utility.parseInts(lines.get(4))).boxed().toList(),
-                0,
-                0,
-                List.of()
+                Arrays.stream(Utility.parseInts(lines.get(4))).boxed().toList()
         );
     }
 
@@ -43,97 +37,142 @@ public class D17ChronospatialComputer {
 
     @Answer
     String output() {
-        var finalState = Stream.iterate(initialState, Objects::nonNull, PState::next)
-                .reduce((s1, s2) -> s2)
-                .orElseThrow();
-        return finalState.output().stream().map(Object::toString).collect(joining(","));
+        var state = new PState(initialState, initialState.regA);
+        do {
+            state.next();
+        } while (!state.halt());
+        return state.output.stream().map(Object::toString).collect(joining(","));
     }
 
     @Answer
-    int lowestValueToDuplicate() {
-        return IntStream.iterate(1, a -> a + 1)
-                .mapToObj(a -> new PState(a, a, initialState.regB(), initialState.regC(), initialState.instrucs(), 0, 0, List.of()))
-                .flatMap(s -> Stream.iterate(s, t -> t != null && t.output().equals(t.instrucs().subList(0, t.output().size())), PState::next))
-                .filter(s -> s.output().equals(s.instrucs()))
-                .mapToInt(PState::initialA)
-                .findFirst()
-                .orElseThrow();
+    long lowestValueToDuplicate() {
+        var candidates = new LinkedList<Long>();
+        candidates.add(0L);
+        for (int i = initialState.instrucs.size() - 1; i >= 0; i--) {
+            var newCandidates = new LinkedList<Long>();
+            for (long candidate : candidates) {
+                for (var add = 0L; add < 8L; add++) {
+                    var testA = (candidate >> 3 * i) + add;
+                    var state = new PState(testA, initialState.regB, initialState.regC, initialState.instrucs);
+                    do {
+                        state.next();
+                    } while (!state.halt());
+                    if (state.output.equals(state.instrucs.subList(i, state.instrucs.size()))) {
+                        newCandidates.add(candidate + (add << (3 * i)));
+                    }
+                }
+            }
+            candidates = newCandidates;
+        }
+        candidates.sort(Comparator.naturalOrder());
+        System.out.println(candidates);
+        long a = candidates.getFirst();
+        var testState = new PState(a, initialState.regB, initialState.regC, initialState.instrucs);
+        do {
+            testState.next();
+        } while (!testState.halt());
+        if (!testState.output.equals(testState.instrucs)) {
+            throw new IllegalStateException("Output is %s not %s".formatted(testState.output, testState.instrucs));
+        }
+        return a;
+
     }
 
-    enum Operation implements UnaryOperator<PState> {
+    enum Operation implements Consumer<PState> {
         ADV {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA() / (1 << p.combo()), p.regB(), p.regC(), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regA = p.regA >> p.combo();
+                p.pointer += 2;
             }
         },
         BXL {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.regB() ^ p.literal(), p.regC(), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regB = p.regB ^ p.literal();
+                p.pointer += 2;
             }
         },
         BST {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.combo() % 8, p.regC(), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regB = p.combo() & 0x7L;
+                p.pointer += 2;
             }
         },
         JNZ {
             @Override
-            public PState apply(PState p) {
-                var pointer = p.regA() != 0 && p.literal() != p.pointer() ? p.literal() : p.pointer() + 2;
-                return new PState(p, p.regA(), p.regB(), p.regC(), pointer, p.output());
+            public void accept(PState p) {
+                int literal = p.literal();
+                p.pointer = p.regA != 0 && literal != p.pointer ? literal : p.pointer + 2;
             }
         },
         BXC {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.regB() ^ p.regC(), p.regC(), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regB = p.regB ^ p.regC;
+                p.pointer += 2;
             }
         },
         OUT {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.regB(), p.regC(), p.pointer() + 2, concat(p.output(), p.combo() % 8));
+            public void accept(PState p) {
+                p.addOutput((int) (p.combo() & 0x7L));
+                p.pointer += 2;
             }
         },
         BDV {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.regA() / (1 << p.combo()), p.regC(), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regB = p.regA >> p.combo();
+                p.pointer += 2;
             }
         },
         CDV {
             @Override
-            public PState apply(PState p) {
-                return new PState(p, p.regA(), p.regB(), p.regA() / (1 << p.combo()), p.pointer() + 2, p.output());
+            public void accept(PState p) {
+                p.regC = p.regA >> p.combo();
+                p.pointer += 2;
             }
-        };
-
-        private static List<Integer> concat(List<Integer> list, int add) {
-            var newList = new ArrayList<Integer>(list.size() + 1);
-            newList.addAll(list);
-            newList.add(add);
-            return Collections.unmodifiableList(newList);
         }
     }
 
-    record PState(
-            int initialA,
-            int regA,
-            int regB,
-            int regC,
-            List<Integer> instrucs,
-            int pointer,
-            int step,
-            List<Integer> output
-    ) {
-        PState(PState other, int regA, int regB, int regC, int pointer, List<Integer> output) {
-            this(other.initialA(), regA, regB, regC, other.instrucs(), pointer, other.step() + 1, output);
+    static final class PState {
+        final long initialA;
+        final List<Integer> instrucs;
+        final List<Integer> output = new ArrayList<>();
+        long regA;
+        long regB;
+        long regC;
+        int pointer = 0;
+        long step = 0L;
+
+        PState(
+                long regA,
+                long regB,
+                long regC,
+                List<Integer> instrucs
+        ) {
+            this.initialA = regA;
+            this.regA = regA;
+            this.regB = regB;
+            this.regC = regC;
+            this.instrucs = List.copyOf(instrucs);
         }
 
-        int combo() {
+        PState(PState other, long a) {
+            initialA = a;
+            instrucs = other.instrucs;
+            regA = a;
+            regB = other.regB;
+            regC = other.regC;
+        }
+
+        public void addOutput(int output) {
+            this.output.add(output);
+        }
+
+        long combo() {
             var operand = instrucs.get(pointer + 1);
             return switch (operand) {
                 case 4 -> regA;
@@ -148,17 +187,29 @@ public class D17ChronospatialComputer {
             return pointer >= instrucs.size();
         }
 
-        PState next() {
-            if (halt()) {
-                return null;
-            }
+        void next() {
             var operation = Operation.values()[instrucs.get(pointer)];
-            PState n = operation.apply(this);
-            return n;
+            operation.accept(this);
+            this.step += 1;
         }
 
         int literal() {
             return instrucs.get(pointer + 1);
         }
+
+        @Override
+        public String toString() {
+            return "PState[" +
+                    "initialA=" + initialA + ", " +
+                    "regA=" + regA + ", " +
+                    "regB=" + regB + ", " +
+                    "regC=" + regC + ", " +
+                    "instrucs=" + instrucs + ", " +
+                    "pointer=" + pointer + ", " +
+                    "step=" + step + ", " +
+                    "output=" + output +
+                    ']';
+        }
+
     }
 }
