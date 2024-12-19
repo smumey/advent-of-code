@@ -98,7 +98,7 @@ public final class Utility {
             edges.forEach((v, edgeDist) -> {
                 if (active.contains(v)) {
                     var distV = dist.applyAsLong(v);
-                    var altDist = distU + edgeDist;
+                    var altDist = distU == Long.MAX_VALUE ? distU : distU + edgeDist;
                     if (altDist < distV) {
                         queue.remove(v);
                         distances.put(v, altDist);
@@ -108,7 +108,7 @@ public final class Utility {
                 }
             });
         }
-        Logger.getLogger(Utility.class.getName()).log(Level.INFO, "shortest path took %d ms".formatted(System.currentTimeMillis() - start));
+        Logger.getLogger(Utility.class.getName()).log(Level.FINE, () -> "shortest path took %d ms".formatted(System.currentTimeMillis() - start));
         return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
     }
 
