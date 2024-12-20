@@ -35,17 +35,24 @@ public final class Grid {
     }
 
     public int move(int coordinate, Direction direction) {
+        return move(coordinate, direction, 1);
+    }
+
+    public int move(int coordinate, Direction direction, int delta) {
+        if (coordinate == OUT) {
+            return OUT;
+        }
         int x = getX(coordinate);
         int y = getY(coordinate);
         int newX = switch (direction) {
             case UP, DOWN -> x;
-            case RIGHT -> x + 1;
-            case LEFT -> x - 1;
+            case RIGHT -> x + delta;
+            case LEFT -> x - delta;
         };
         int newY = switch (direction) {
-            case UP -> y - 1;
+            case UP -> y - delta;
             case RIGHT, LEFT -> y;
-            case DOWN -> y + 1;
+            case DOWN -> y + delta;
         };
         return inbounds(newX, newY) ? toCoordinate(newX, newY) : OUT;
     }
@@ -80,6 +87,10 @@ public final class Grid {
 
     public int height() {
         return rows.length;
+    }
+
+    public int distance(int pos1, int pos2) {
+        return Math.abs(getX(pos2) - getX(pos1)) + Math.abs(getY(pos2) - getY(pos1));
     }
 
     @Override
