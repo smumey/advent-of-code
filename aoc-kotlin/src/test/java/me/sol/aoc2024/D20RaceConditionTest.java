@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class D20RaceConditionTest {
 
     @Test
-    void numberOfCheats() throws IOException {
-        assertThat(new D20RaceCondition(Utility.readSample(getClass(), Utility::parseCharGrid), 20).numberOfCheats()).isEqualTo(5);
+    void p1NumberOfCheats() throws IOException {
+        assertThat(new D20RaceCondition(Utility.readSample(getClass(), Utility::parseCharGrid), 20).p1NumberOfCheats()).isEqualTo(5);
     }
 }
