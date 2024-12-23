@@ -11,6 +11,9 @@ class D21KeypadConundrumTest {
 
     @Test
     void complexitySum() throws IOException {
-        assertThat(new D21KeypadConundrum(Utility.readSample(getClass(), D21KeypadConundrum::parse)).complexitySum()).isEqualTo(126384);
+        assertThat(new D21KeypadConundrum(Utility.readSample(
+                getClass(),
+                D21KeypadConundrum::parse
+        )).p1ComplexitySum()).isEqualTo(126384);
     }
 }
