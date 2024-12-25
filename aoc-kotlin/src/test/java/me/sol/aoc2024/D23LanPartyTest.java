@@ -13,4 +13,10 @@ class D23LanPartyTest {
     void p1TripletsCount() throws IOException {
         assertThat(new D23LanParty(Utility.readSample(getClass(), D23LanParty::parse)).p1TripletsCount()).isEqualTo(7L);
     }
+
+    @Test
+    void p2LargestClique() throws IOException {
+        assertThat(new D23LanParty(Utility.readSample(getClass(), D23LanParty::parse)).p2LargestClique())
+                .isEqualTo("co,de,ka,ta");
+    }
 }
