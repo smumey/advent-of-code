@@ -5,13 +5,12 @@ import me.sol.Utility;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.IntBinaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -19,6 +18,7 @@ import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toUnmodifiableMap;
 import static me.sol.aoc2024.D24CrossedWires.Operator.AND;
+import static me.sol.aoc2024.D24CrossedWires.Operator.OR;
 import static me.sol.aoc2024.D24CrossedWires.Operator.XOR;
 
 public class D24CrossedWires {
@@ -52,6 +52,10 @@ public class D24CrossedWires {
         this.swapsNeeded = swapsNeeded;
     }
 
+    String makeWire(char prefix, int index) {
+        return "%c%02d".formatted(prefix, index);
+    }
+
     @Answer
     long p1ZedValue() {
         var map = new ConcurrentHashMap<>(input.assignments);
@@ -67,38 +71,48 @@ public class D24CrossedWires {
         var zVars = getVars('z');
         var gates = input.gates();
         var carry = 0;
-        var swaps = new HashSet<Swap>();
+        var swaps = Set.of(new Swap("z06", "hwk"), new Swap("tnt", "qmd"), new Swap("z31", "hpc"), new Swap("z37", "cgr"));
         String andWire;
         String xorWire;
         String carryWire = null;
         String zWire;
+        String prevCarryAndXorWire = null;
         var outputMap = reverse();
 
-        for (int i = 0; i< zVars.size(); i++) {
-            andWire = findOutputWire(outputMap, AND, makeWire('x', i), makeWire('y', i));
-            xorWire = findOutputWire(outputMap, XOR, makeWire('x', i), makeWire('y', i));
-            zWire = carryWire == null ? xorWire : fin
-
+        for (int i = 0; i < xVars.size(); i++) {
+            andWire = findOutputWire(outputMap, swaps, AND, makeWire('x', i), makeWire('y', i));
+            xorWire = findOutputWire(outputMap, swaps, XOR, makeWire('x', i), makeWire('y', i));
+            if (i == 0) {
+                zWire = xorWire;
+                carryWire = andWire;
+            } else {
+                zWire = findOutputWire(outputMap, swaps, XOR, xorWire, carryWire);
+                var zExpected = input.gates.get("z25");
+//                if (!zWire.equals(makeWire('z', i))) {
+//                    i
+//                }
+                prevCarryAndXorWire = findOutputWire(outputMap, swaps, AND, carryWire, xorWire);
+                carryWire = findOutputWire(outputMap, swaps, OR, prevCarryAndXorWire, andWire);
+            }
+            System.out.printf(
+                    "i=%d andWire=%s xorWire=%s zWire=%s prevCarryAndXorWire=%s, carryWire=%s%n",
+                    i,
+                    andWire,
+                    xorWire,
+                    zWire,
+                    prevCarryAndXorWire,
+                    carryWire
+            );
         }
+        return swaps.stream()
+                .flatMap(s -> Stream.of(s.wire1(), s.wire2()))
+                .sorted()
+                .collect(Collectors.joining(","));
     }
-
-    String makeWire(char prefix, int index) {
-        return "%c%00d".formatted(prefix, index);
-    }
-
-    String findOutputWire(Map<Gate, String> outputMap, Operator operator, String wire1, String wire2) {
-        var wire = outputMap.get(new Gate(operator, wire1, wire2));
-        return wire == null ? outputMap.get(new Gate(operator, wire2, wire1)) : wire;
-    }
-
 
     Map<Gate, String> reverse() {
         return input.gates.entrySet().stream()
                 .collect(toMap(e -> e.getValue(), e -> e.getKey()));
-    }
-
-    record Swap(String wire1, String wire2) {
-
     }
 
     private Integer evaluate(ConcurrentHashMap<String, Integer> map, String v) {
@@ -109,6 +123,18 @@ public class D24CrossedWires {
                     return value;
                 }
         );
+    }
+
+    private String findOutputWire(Map<Gate, String> outputMap, Set<Swap> swaps, Operator operator, String wire1, String wire2) {
+        var w = outputMap.get(new Gate(operator, wire1, wire2));
+        var wire = w == null ? outputMap.get(new Gate(operator, wire2, wire1)) : w;
+        return swaps.stream().filter(s -> s.wire1().equals(wire)).findFirst().map(s -> s.wire2())
+                .orElseGet(() -> swaps.stream()
+                        .filter(s -> s.wire2().equals(wire))
+                        .findFirst()
+                        .map(s -> s.wire1())
+                        .orElse(wire)
+                );
     }
 
     private long getValue(List<String> vars, ConcurrentHashMap<String, Integer> map) {
@@ -124,13 +150,6 @@ public class D24CrossedWires {
                 .filter(var -> var.charAt(0) == prefix)
                 .sorted()
                 .toList();
-    }
-
-    private Set<String> inputWires(String wire) {
-        return input.gates().compute(
-                wire,
-                (var, gate) ->
-                )
     }
 
     enum Operator implements IntBinaryOperator {
@@ -150,9 +169,19 @@ public class D24CrossedWires {
         }
     }
 
+//    private Set<String> inputWires(String wire) {
+//        return input.gates().compute(
+//                wire,
+//                (var, gate) ->
+//                )
+//    }
+
     record Gate(Operator operator, String wire1, String wire2) {
     }
 
     record Input(Map<String, Integer> assignments, Map<String, Gate> gates) {
+    }
+
+    record Swap(String wire1, String wire2) {
     }
 }
