@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -81,7 +83,11 @@ public final class Utility {
                 .toArray(long[][]::new);
     }
 
-    public static <S> PathResponse<S> findShortestPath(List<? extends S> nodes, Function<S, Map<S, Long>> edgeGenerator, S source) {
+    public static <S> PathResponse<S> findShortestPath(
+            List<? extends S> nodes,
+            Function<S, Map<S, Long>> edgeGenerator,
+            S source
+    ) {
         var start = System.currentTimeMillis();
         var distances = new HashMap<S, Long>();
         var dist = (ToLongFunction<S>) node -> distances.computeIfAbsent(node, n -> Long.MAX_VALUE);
@@ -108,7 +114,8 @@ public final class Utility {
                 }
             });
         }
-        Logger.getLogger(Utility.class.getName()).log(Level.FINE, () -> "shortest path took %d ms".formatted(System.currentTimeMillis() - start));
+        Logger.getLogger(Utility.class.getName())
+                .log(Level.FINE, () -> "shortest path took %d ms".formatted(System.currentTimeMillis() - start));
         return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
     }
 
@@ -117,6 +124,36 @@ public final class Utility {
                 .filter(s -> s.matches("^-?\\d+$"))
                 .mapToInt(Integer::parseInt)
                 .toArray();
+    }
+
+    public static List<Long> primeFactors(long number) {
+        var factors = new ArrayList<Long>();
+        var n = number;
+        for (var i = 2L; i <= n / i; i++) {
+            while (n % i == 0) {
+                factors.add(i);
+                n /= i;
+            }
+        }
+        if (n > 1) {
+            factors.add(n);
+        }
+        return Collections.unmodifiableList(factors);
+    }
+
+    public static List<Integer> primeFactors(int number) {
+        var factors = new ArrayList<Integer>();
+        var n = number;
+        for (var i = 2; i <= n / i; i++) {
+            while (n % i == 0) {
+                factors.add(i);
+                n /= i;
+            }
+        }
+        if (n > 1) {
+            factors.add(n);
+        }
+        return Collections.unmodifiableList(factors);
     }
 
     private Utility() {
