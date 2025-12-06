@@ -14,10 +14,7 @@ import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static aoc.Direction.DOWN;
-import static aoc.Direction.LEFT;
-import static aoc.Direction.RIGHT;
-import static aoc.Direction.UP;
+import static aoc.Direction.*;
 
 public class D15WarehouseWoes {
     private static final long[] WIDE_BOX = {'[', ']'};
@@ -25,6 +22,10 @@ public class D15WarehouseWoes {
     private static final long[] WIDE_SPACE = {'.', '.'};
     private static final long[] WIDE_WALL = {'#', '#'};
     private final State initialState;
+
+    public D15WarehouseWoes(State initialState) {
+        this.initialState = initialState;
+    }
 
     public static void main(String[] args) throws IOException {
         Utility.execute(new D15WarehouseWoes(Utility.readInput(D15WarehouseWoes.class, D15WarehouseWoes::parse)));
@@ -52,10 +53,6 @@ public class D15WarehouseWoes {
                 .sum();
     }
 
-    public D15WarehouseWoes(State initialState) {
-        this.initialState = initialState;
-    }
-
     @Answer
     long p1SumBoxGps() {
         var finalState = Stream.iterate(initialState, s -> s != null, s -> s.nextState())
@@ -76,7 +73,7 @@ public class D15WarehouseWoes {
 
     @Answer
     long p2SumDoubleWideBoxGps() {
-        var wideArray = Arrays.stream(initialState.grid().getRows())
+        var wideArray = Arrays.stream(initialState.grid().rows())
                 .map(r -> Arrays.stream(r).flatMap(cell -> Arrays.stream(mapToWide((int) cell))).toArray())
                 .toArray(long[][]::new);
         var wideGrid = new Grid(wideArray);

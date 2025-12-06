@@ -2,21 +2,12 @@ package me.sol;
 
 import aoc.Direction;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public final class Grid {
+public record Grid(long[][] rows) {
     public static final int OUT = -1;
-    private final long[][] rows;
-
-    public Grid(long[][] rows) {
-        this.rows = rows;
-    }
 
     public int toCoordinate(int x, int y) {
         return y * width() + x;
@@ -75,6 +66,21 @@ public final class Grid {
         return Arrays.stream(Direction.values())
                 .mapToInt(d -> move(origin, d))
                 .filter(n -> n != OUT);
+    }
+
+    public int getSurroundingCount(int origin, long value) {
+        var count = 0;
+        for (var deltaY = -1; deltaY <= 1; deltaY++) {
+            for (var deltaX = -1; deltaX <= 1; deltaX++) {
+                if (!(deltaX == 0 && deltaY == 0)) {
+                    var coord = move(origin, deltaX, deltaY);
+                    if (coord != OUT && getValue(coord) == value) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     public String coordToString(int coordinate) {
@@ -152,7 +158,8 @@ public final class Grid {
         return new Grid(Utility.copy(rows));
     }
 
-    public long[][] getRows() {
+    @Override
+    public long[][] rows() {
         return Utility.copy(rows);
     }
 }
