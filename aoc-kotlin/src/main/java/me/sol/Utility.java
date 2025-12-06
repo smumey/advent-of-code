@@ -23,20 +23,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class Utility {
-    public static <T> T readInput(Class<?> clazz, Function<Stream<String>, T> parser) throws IOException {
-        return read(clazz, parser, "input");
-    }
-
-    public static <T> T readSample(Class<?> clazz, Function<Stream<String>, T> parser) throws IOException {
-        return read(clazz, parser, "sample");
-    }
-
-    private static <T> T read(Class<?> clazz, Function<Stream<String>, T> parser, String fileSuffix) throws IOException {
-        var dirName = clazz.getPackageName().replaceFirst(".*\\.", "");
-        var inputName = "/input/%s/%s-%s".formatted(dirName, clazz.getSimpleName().substring(0, 3).toLowerCase(), fileSuffix);
-        try (var reader = new BufferedReader(new InputStreamReader(clazz.getResourceAsStream(inputName)))) {
-            return parser.apply(reader.lines());
-        }
+    public static long[][] copy(long[][] map) {
+        return Arrays.stream(map)
+                .map(r -> r.clone())
+                .toArray(long[][]::new);
     }
 
     public static void execute(Object o) {
@@ -48,39 +38,18 @@ public final class Utility {
                         method.setAccessible(true);
                         var start = Instant.now();
                         var result = method.invoke(o);
-                        System.out.printf("  %s: %s (%s)%n", method.getName(), result, Duration.between(start, Instant.now()));
+                        var finish = Instant.now();
+                        System.out.printf(
+                                "  %s: %s (%d ms)%n",
+                                method.getName(),
+                                result,
+                                Duration.between(start, finish).toMillis()
+                        );
                     } catch (Exception e) {
                         Logger.getLogger(o.getClass().getSimpleName()).log(Level.SEVERE, "Exception executing %s", e);
                         throw new RuntimeException(e);
                     }
                 });
-    }
-
-    public static <T> Grid parseCharGrid(Stream<String> lines) {
-        return new Grid(
-                lines.map(l -> l.chars().mapToLong(c -> c).toArray()).toArray(long[][]::new)
-        );
-    }
-
-    public static long greatestCommonDenominator(long a, long b) {
-        if (b == 0) {
-            return a;
-        }
-        return greatestCommonDenominator(b, a % b);
-    }
-
-    public static <T> Stream<List<T>> sliding(List<T> list, int size) {
-        if (size > list.size()) {
-            return Stream.empty();
-        }
-        return IntStream.range(0, list.size() - size + 1)
-                .mapToObj(start -> list.subList(start, start + size));
-    }
-
-    public static long[][] copy(long[][] map) {
-        return Arrays.stream(map)
-                .map(r -> r.clone())
-                .toArray(long[][]::new);
     }
 
     public static <S> PathResponse<S> findShortestPath(
@@ -119,6 +88,19 @@ public final class Utility {
         return new PathResponse<>(dist, n -> Optional.ofNullable(previous.get(n)));
     }
 
+    public static long greatestCommonDenominator(long a, long b) {
+        if (b == 0) {
+            return a;
+        }
+        return greatestCommonDenominator(b, a % b);
+    }
+
+    public static <T> Grid parseCharGrid(Stream<String> lines) {
+        return new Grid(
+                lines.map(l -> l.chars().mapToLong(c -> c).toArray()).toArray(long[][]::new)
+        );
+    }
+
     public static int[] parseInts(String line) {
         return Arrays.stream(line.split("[\\s,]+"))
                 .filter(s -> s.matches("^-?\\d+$"))
@@ -154,6 +136,30 @@ public final class Utility {
             factors.add(n);
         }
         return Collections.unmodifiableList(factors);
+    }
+
+    public static <T> T readInput(Class<?> clazz, Function<Stream<String>, T> parser) throws IOException {
+        return read(clazz, parser, "input");
+    }
+
+    public static <T> T readSample(Class<?> clazz, Function<Stream<String>, T> parser) throws IOException {
+        return read(clazz, parser, "sample");
+    }
+
+    public static <T> Stream<List<T>> sliding(List<T> list, int size) {
+        if (size > list.size()) {
+            return Stream.empty();
+        }
+        return IntStream.range(0, list.size() - size + 1)
+                .mapToObj(start -> list.subList(start, start + size));
+    }
+
+    private static <T> T read(Class<?> clazz, Function<Stream<String>, T> parser, String fileSuffix) throws IOException {
+        var dirName = clazz.getPackageName().replaceFirst(".*\\.", "");
+        var inputName = "/input/%s/%s-%s".formatted(dirName, clazz.getSimpleName().substring(0, 3).toLowerCase(), fileSuffix);
+        try (var reader = new BufferedReader(new InputStreamReader(clazz.getResourceAsStream(inputName)))) {
+            return parser.apply(reader.lines());
+        }
     }
 
     private Utility() {

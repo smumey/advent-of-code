@@ -8,6 +8,7 @@ import java.io.IOException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class D02GiftShopTest {
+
     @Test
     void sumInvalidP1() throws IOException {
         assertThat(new D02GiftShop(Utility.readSample(
