@@ -18,3 +18,22 @@ fun distinctRanges(ranges: List<IntRange>): List<IntRange> {
         }
     }
 }
+
+fun distinctLongRanges(ranges: List<LongRange>): List<LongRange> {
+    val sorted = ranges.sortedBy { it.first }
+    return sorted.fold(listOf()) { distinct, range ->
+        if (distinct.isEmpty()) listOf(range)
+        else {
+            val lastRange: LongRange = distinct.last()
+            if (lastRange.last >= range.first - 1) {
+                if (lastRange.last >= range.last) {
+                    distinct
+                } else {
+                    distinct.dropLast(1).plusElement(lastRange.first..range.last)
+                }
+            } else {
+                distinct.plusElement(range)
+            }
+        }
+    }
+}
