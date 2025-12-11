@@ -50,7 +50,6 @@ data class Coordinate3D(val x: Int, val y: Int, val z: Int) {
             Direction3D.OUT -> Coordinate3D(x, y, z + 1)
         }
     }
-
 }
 
 enum class Direction3D {
